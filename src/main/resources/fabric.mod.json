@@ -1,0 +1,37 @@
+{
+	"schemaVersion": 1,
+	"id": "exsanguinate",
+	"version": "${version}",
+	"name": "Exsanguinate",
+	"description": "Infuse weapons with blood.",
+	"authors": [
+		"yut"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "MIT",
+	"icon": "assets/exsanguinate/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.yut.exsanguinate.Exsanguinate"
+		],
+        "client": [
+          "net.yut.exsanguinate.ExsanguinateClient"
+        ],
+		"fabric-datagen": [
+			"net.yut.exsanguinate.ExsanguinateDataGenerator"
+		]
+	},
+	"mixins": [
+		"exsanguinate.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.18.4",
+		"minecraft": "~1.20.1",
+		"java": ">=17",
+		"fabric-api": "*"
+	}
+}
