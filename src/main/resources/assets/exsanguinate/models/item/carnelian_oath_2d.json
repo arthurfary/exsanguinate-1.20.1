@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "exsanguinate:item/carnelian_oath_2d"
+  }
+}

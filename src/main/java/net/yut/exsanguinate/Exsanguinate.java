@@ -2,6 +2,7 @@ package net.yut.exsanguinate;
 
 import net.fabricmc.api.ModInitializer;
 
+import net.yut.exsanguinate.effect.ModEffects;
 import net.yut.exsanguinate.item.ModItems;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,5 +14,6 @@ public class Exsanguinate implements ModInitializer {
 	@Override
 	public void onInitialize() {
         ModItems.registerModItems();
+        ModEffects.registerModEffects();
 	}
 }

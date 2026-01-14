@@ -12,9 +12,8 @@ import net.minecraft.util.Identifier;
 import net.yut.exsanguinate.Exsanguinate;
 
 public class ModItems {
-    // Using IRON material for now - you can change this to DIAMOND, NETHERITE, etc.
     public static final Item CARNELIAN_OATH = registerItem("carnelian_oath",
-            new SwordItem(ToolMaterials.IRON, 3, -2.4f, new Item.Settings()));
+            new CarnelianOathItem(ToolMaterials.NETHERITE, 5, -3.2f, new Item.Settings()));
 
     private static Item registerItem(String name, Item item){
         return Registry.register(Registries.ITEM, new Identifier(Exsanguinate.MOD_ID, name), item);
