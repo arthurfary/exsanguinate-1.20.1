@@ -1,0 +1,20 @@
+{
+    "sword_swing": {
+        "subtitle": "subtitles.exsanguinate.sword_swing",
+        "sounds": [
+            "exsanguinate:sword_swing"
+        ]
+    },
+    "blood_drain": {
+        "subtitle": "subtitles.exsanguinate.blood_drain",
+        "sounds": [
+            "exsanguinate:blood_drain"
+        ]
+    },
+    "blood_fail": {
+        "subtitle": "subtitles.exsanguinate.blood_fail",
+        "sounds": [
+            "exsanguinate:blood_fail"
+        ]
+    }
+}

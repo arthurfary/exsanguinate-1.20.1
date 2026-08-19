@@ -1,0 +1,15 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+        {
+            "item": "minecraft:iron_ingot"
+        },
+        {
+            "item": "minecraft:rotten_flesh"
+        }
+    ],
+    "result": {
+        "item": "exsanguinate:blood_infused_iron",
+        "count": 1
+    }
+}

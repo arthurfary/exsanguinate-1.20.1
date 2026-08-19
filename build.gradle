@@ -1,4 +1,7 @@
 plugins {
+	// "Loom" is Fabric's build plugin. It downloads Minecraft, deobfuscates
+	// it (turns obfuscated names into readable ones via "mappings") and
+	// packages your mod. Version comes from gradle.properties.
 	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
 	id 'maven-publish'
 }
@@ -27,11 +30,14 @@ fabricApi {
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	//mappings loom.officialMojangMappings()
+	// "Mappings" translate Minecraft's obfuscated code into readable names
+	// (e.g. MinecraftServer.loadWorld instead of method_3851). Yarn is the
+	// community mapping set; Mojang mappings are the official alternative.
     mappings "net.fabricmc:yarn:1.20.1+build.10:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	// Fabric API. This is technically optional, but you probably want it anyway.
+	// Fabric API: the community-made library of hooks into Minecraft,
+	// like item group events and datagen. This is what makes modding easy.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 	
 }

@@ -3,7 +3,14 @@
 	"package": "net.yut.exsanguinate.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
-		"ExampleMixin"
+		"ExampleMixin",
+		"LivingEntityAccessor",
+		"LivingEntityMixin",
+		"PlayerEntityMixin"
+	],
+	"client": [
+		"GameRendererAccessor",
+		"GameRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

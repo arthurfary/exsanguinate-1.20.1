@@ -1,0 +1,594 @@
+{
+	"format_version": "1.9.0",
+	"credit": "Made with Blockbench",
+	"texture_size": [32, 32],
+	"textures": {
+		"2": "exsanguinate:item/carnelian_oath",
+		"particle": "exsanguinate:item/carnelian_oath"
+	},
+	"elements": [
+		{
+			"name": "carnelian_oath_0",
+			"from": [-8, 28, -8],
+			"to": [-3, 32, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [2.5, 0, 0, 2], "texture": "#2"},
+				"east": {"uv": [2, 0, 2.5, 2], "texture": "#2"},
+				"south": {"uv": [0, 0, 2.5, 2], "texture": "#2"},
+				"west": {"uv": [0, 0, 0.5, 2], "texture": "#2"},
+				"up": {"uv": [0, 0, 2.5, 0.5], "texture": "#2"},
+				"down": {"uv": [0, 1.5, 2.5, 2], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_1",
+			"from": [-3, 22, -8],
+			"to": [-2, 31, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [3, 0.5, 2.5, 5], "texture": "#2"},
+				"east": {"uv": [2.5, 0.5, 3, 5], "texture": "#2"},
+				"south": {"uv": [2.5, 0.5, 3, 5], "texture": "#2"},
+				"west": {"uv": [2.5, 0.5, 3, 5], "texture": "#2"},
+				"up": {"uv": [2.5, 0.5, 3, 1], "texture": "#2"},
+				"down": {"uv": [2.5, 4.5, 3, 5], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_2",
+			"from": [-2, 21, -8],
+			"to": [-1, 30, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [3.5, 1, 3, 5.5], "texture": "#2"},
+				"east": {"uv": [3, 1, 3.5, 5.5], "texture": "#2"},
+				"south": {"uv": [3, 1, 3.5, 5.5], "texture": "#2"},
+				"west": {"uv": [3, 1, 3.5, 5.5], "texture": "#2"},
+				"up": {"uv": [3, 1, 3.5, 1.5], "texture": "#2"},
+				"down": {"uv": [3, 5, 3.5, 5.5], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_3",
+			"from": [-1, 20, -8],
+			"to": [0, 29, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [4, 1.5, 3.5, 6], "texture": "#2"},
+				"east": {"uv": [3.5, 1.5, 4, 6], "texture": "#2"},
+				"south": {"uv": [3.5, 1.5, 4, 6], "texture": "#2"},
+				"west": {"uv": [3.5, 1.5, 4, 6], "texture": "#2"},
+				"up": {"uv": [3.5, 1.5, 4, 2], "texture": "#2"},
+				"down": {"uv": [3.5, 5.5, 4, 6], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_4",
+			"from": [-7, 27, -8],
+			"to": [-3, 28, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [2.5, 2, 0.5, 2.5], "texture": "#2"},
+				"east": {"uv": [2, 2, 2.5, 2.5], "texture": "#2"},
+				"south": {"uv": [0.5, 2, 2.5, 2.5], "texture": "#2"},
+				"west": {"uv": [0.5, 2, 1, 2.5], "texture": "#2"},
+				"up": {"uv": [0.5, 2, 2.5, 2.5], "texture": "#2"},
+				"down": {"uv": [0.5, 2, 2.5, 2.5], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_5",
+			"from": [0, 19, -8],
+			"to": [1, 28, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [4.5, 2, 4, 6.5], "texture": "#2"},
+				"east": {"uv": [4, 2, 4.5, 6.5], "texture": "#2"},
+				"south": {"uv": [4, 2, 4.5, 6.5], "texture": "#2"},
+				"west": {"uv": [4, 2, 4.5, 6.5], "texture": "#2"},
+				"up": {"uv": [4, 2, 4.5, 2.5], "texture": "#2"},
+				"down": {"uv": [4, 6, 4.5, 6.5], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_6",
+			"from": [-4, 23, -8],
+			"to": [-3, 27, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [2.5, 2.5, 2, 4.5], "texture": "#2"},
+				"east": {"uv": [2, 2.5, 2.5, 4.5], "texture": "#2"},
+				"south": {"uv": [2, 2.5, 2.5, 4.5], "texture": "#2"},
+				"west": {"uv": [2, 2.5, 2.5, 4.5], "texture": "#2"},
+				"up": {"uv": [2, 2.5, 2.5, 3], "texture": "#2"},
+				"down": {"uv": [2, 4, 2.5, 4.5], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_7",
+			"from": [1, 18, -8],
+			"to": [2, 27, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [5, 2.5, 4.5, 7], "texture": "#2"},
+				"east": {"uv": [4.5, 2.5, 5, 7], "texture": "#2"},
+				"south": {"uv": [4.5, 2.5, 5, 7], "texture": "#2"},
+				"west": {"uv": [4.5, 2.5, 5, 7], "texture": "#2"},
+				"up": {"uv": [4.5, 2.5, 5, 3], "texture": "#2"},
+				"down": {"uv": [4.5, 6.5, 5, 7], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_8",
+			"from": [-6, 25, -8],
+			"to": [-4, 26, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [2, 3, 1, 3.5], "texture": "#2"},
+				"east": {"uv": [1.5, 3, 2, 3.5], "texture": "#2"},
+				"south": {"uv": [1, 3, 2, 3.5], "texture": "#2"},
+				"west": {"uv": [1, 3, 1.5, 3.5], "texture": "#2"},
+				"up": {"uv": [1, 3, 2, 3.5], "texture": "#2"},
+				"down": {"uv": [1, 3, 2, 3.5], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_9",
+			"from": [2, 18, -8],
+			"to": [3, 26, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [5.5, 3, 5, 7], "texture": "#2"},
+				"east": {"uv": [5, 3, 5.5, 7], "texture": "#2"},
+				"south": {"uv": [5, 3, 5.5, 7], "texture": "#2"},
+				"west": {"uv": [5, 3, 5.5, 7], "texture": "#2"},
+				"up": {"uv": [5, 3, 5.5, 3.5], "texture": "#2"},
+				"down": {"uv": [5, 6.5, 5.5, 7], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_10",
+			"from": [-5, 24, -8],
+			"to": [-4, 25, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [2, 3.5, 1.5, 4], "texture": "#2"},
+				"east": {"uv": [1.5, 3.5, 2, 4], "texture": "#2"},
+				"south": {"uv": [1.5, 3.5, 2, 4], "texture": "#2"},
+				"west": {"uv": [1.5, 3.5, 2, 4], "texture": "#2"},
+				"up": {"uv": [1.5, 3.5, 2, 4], "texture": "#2"},
+				"down": {"uv": [1.5, 3.5, 2, 4], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_11",
+			"from": [3, 16, -8],
+			"to": [4, 25, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [6, 3.5, 5.5, 8], "texture": "#2"},
+				"east": {"uv": [5.5, 3.5, 6, 8], "texture": "#2"},
+				"south": {"uv": [5.5, 3.5, 6, 8], "texture": "#2"},
+				"west": {"uv": [5.5, 3.5, 6, 8], "texture": "#2"},
+				"up": {"uv": [5.5, 3.5, 6, 4], "texture": "#2"},
+				"down": {"uv": [5.5, 7.5, 6, 8], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_12",
+			"from": [4, 15, -8],
+			"to": [5, 24, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [6.5, 4, 6, 8.5], "texture": "#2"},
+				"east": {"uv": [6, 4, 6.5, 8.5], "texture": "#2"},
+				"south": {"uv": [6, 4, 6.5, 8.5], "texture": "#2"},
+				"west": {"uv": [6, 4, 6.5, 8.5], "texture": "#2"},
+				"up": {"uv": [6, 4, 6.5, 4.5], "texture": "#2"},
+				"down": {"uv": [6, 8, 6.5, 8.5], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_13",
+			"from": [5, 14, -8],
+			"to": [6, 23, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [7, 4.5, 6.5, 9], "texture": "#2"},
+				"east": {"uv": [6.5, 4.5, 7, 9], "texture": "#2"},
+				"south": {"uv": [6.5, 4.5, 7, 9], "texture": "#2"},
+				"west": {"uv": [6.5, 4.5, 7, 9], "texture": "#2"},
+				"up": {"uv": [6.5, 4.5, 7, 5], "texture": "#2"},
+				"down": {"uv": [6.5, 8.5, 7, 9], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_14",
+			"from": [6, 13, -8],
+			"to": [7, 22, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [7.5, 5, 7, 9.5], "texture": "#2"},
+				"east": {"uv": [7, 5, 7.5, 9.5], "texture": "#2"},
+				"south": {"uv": [7, 5, 7.5, 9.5], "texture": "#2"},
+				"west": {"uv": [7, 5, 7.5, 9.5], "texture": "#2"},
+				"up": {"uv": [7, 5, 7.5, 5.5], "texture": "#2"},
+				"down": {"uv": [7, 9, 7.5, 9.5], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_15",
+			"from": [7, 12, -8],
+			"to": [8, 21, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [8, 5.5, 7.5, 10], "texture": "#2"},
+				"east": {"uv": [7.5, 5.5, 8, 10], "texture": "#2"},
+				"south": {"uv": [7.5, 5.5, 8, 10], "texture": "#2"},
+				"west": {"uv": [7.5, 5.5, 8, 10], "texture": "#2"},
+				"up": {"uv": [7.5, 5.5, 8, 6], "texture": "#2"},
+				"down": {"uv": [7.5, 9.5, 8, 10], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_16",
+			"from": [8, 11, -8],
+			"to": [9, 20, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [8.5, 6, 8, 10.5], "texture": "#2"},
+				"east": {"uv": [8, 6, 8.5, 10.5], "texture": "#2"},
+				"south": {"uv": [8, 6, 8.5, 10.5], "texture": "#2"},
+				"west": {"uv": [8, 6, 8.5, 10.5], "texture": "#2"},
+				"up": {"uv": [8, 6, 8.5, 6.5], "texture": "#2"},
+				"down": {"uv": [8, 10, 8.5, 10.5], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_17",
+			"from": [9, 10, -8],
+			"to": [10, 19, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [9, 6.5, 8.5, 11], "texture": "#2"},
+				"east": {"uv": [8.5, 6.5, 9, 11], "texture": "#2"},
+				"south": {"uv": [8.5, 6.5, 9, 11], "texture": "#2"},
+				"west": {"uv": [8.5, 6.5, 9, 11], "texture": "#2"},
+				"up": {"uv": [8.5, 6.5, 9, 7], "texture": "#2"},
+				"down": {"uv": [8.5, 10.5, 9, 11], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_18",
+			"from": [10, 9, -8],
+			"to": [11, 18, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [9.5, 7, 9, 11.5], "texture": "#2"},
+				"east": {"uv": [9, 7, 9.5, 11.5], "texture": "#2"},
+				"south": {"uv": [9, 7, 9.5, 11.5], "texture": "#2"},
+				"west": {"uv": [9, 7, 9.5, 11.5], "texture": "#2"},
+				"up": {"uv": [9, 7, 9.5, 7.5], "texture": "#2"},
+				"down": {"uv": [9, 11, 9.5, 11.5], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_19",
+			"from": [11, 8, -8],
+			"to": [12, 17, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [10, 7.5, 9.5, 12], "texture": "#2"},
+				"east": {"uv": [9.5, 7.5, 10, 12], "texture": "#2"},
+				"south": {"uv": [9.5, 7.5, 10, 12], "texture": "#2"},
+				"west": {"uv": [9.5, 7.5, 10, 12], "texture": "#2"},
+				"up": {"uv": [9.5, 7.5, 10, 8], "texture": "#2"},
+				"down": {"uv": [9.5, 11.5, 10, 12], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_20",
+			"from": [12, 7, -8],
+			"to": [13, 16, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [10.5, 8, 10, 12.5], "texture": "#2"},
+				"east": {"uv": [10, 8, 10.5, 12.5], "texture": "#2"},
+				"south": {"uv": [10, 8, 10.5, 12.5], "texture": "#2"},
+				"west": {"uv": [10, 8, 10.5, 12.5], "texture": "#2"},
+				"up": {"uv": [10, 8, 10.5, 8.5], "texture": "#2"},
+				"down": {"uv": [10, 12, 10.5, 12.5], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_21",
+			"from": [13, 6, -8],
+			"to": [14, 15, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [11, 8.5, 10.5, 13], "texture": "#2"},
+				"east": {"uv": [10.5, 8.5, 11, 13], "texture": "#2"},
+				"south": {"uv": [10.5, 8.5, 11, 13], "texture": "#2"},
+				"west": {"uv": [10.5, 8.5, 11, 13], "texture": "#2"},
+				"up": {"uv": [10.5, 8.5, 11, 9], "texture": "#2"},
+				"down": {"uv": [10.5, 12.5, 11, 13], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_22",
+			"from": [14, 1, -8],
+			"to": [15, 14, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [11.5, 9, 11, 15.5], "texture": "#2"},
+				"east": {"uv": [11, 9, 11.5, 15.5], "texture": "#2"},
+				"south": {"uv": [11, 9, 11.5, 15.5], "texture": "#2"},
+				"west": {"uv": [11, 9, 11.5, 15.5], "texture": "#2"},
+				"up": {"uv": [11, 9, 11.5, 9.5], "texture": "#2"},
+				"down": {"uv": [11, 15, 11.5, 15.5], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_23",
+			"from": [15, 2, -8],
+			"to": [16, 13, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [12, 9.5, 11.5, 15], "texture": "#2"},
+				"east": {"uv": [11.5, 9.5, 12, 15], "texture": "#2"},
+				"south": {"uv": [11.5, 9.5, 12, 15], "texture": "#2"},
+				"west": {"uv": [11.5, 9.5, 12, 15], "texture": "#2"},
+				"up": {"uv": [11.5, 9.5, 12, 10], "texture": "#2"},
+				"down": {"uv": [11.5, 14.5, 12, 15], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_24",
+			"from": [16, 1, -8],
+			"to": [17, 12, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [12.5, 10, 12, 15.5], "texture": "#2"},
+				"east": {"uv": [12, 10, 12.5, 15.5], "texture": "#2"},
+				"south": {"uv": [12, 10, 12.5, 15.5], "texture": "#2"},
+				"west": {"uv": [12, 10, 12.5, 15.5], "texture": "#2"},
+				"up": {"uv": [12, 10, 12.5, 10.5], "texture": "#2"},
+				"down": {"uv": [12, 15, 12.5, 15.5], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_25",
+			"from": [20, 8, -8],
+			"to": [22, 12, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [15, 10, 14, 12], "texture": "#2"},
+				"east": {"uv": [14.5, 10, 15, 12], "texture": "#2"},
+				"south": {"uv": [14, 10, 15, 12], "texture": "#2"},
+				"west": {"uv": [14, 10, 14.5, 12], "texture": "#2"},
+				"up": {"uv": [14, 10, 15, 10.5], "texture": "#2"},
+				"down": {"uv": [14, 11.5, 15, 12], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_26",
+			"from": [17, 3, -8],
+			"to": [18, 11, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [13, 10.5, 12.5, 14.5], "texture": "#2"},
+				"east": {"uv": [12.5, 10.5, 13, 14.5], "texture": "#2"},
+				"south": {"uv": [12.5, 10.5, 13, 14.5], "texture": "#2"},
+				"west": {"uv": [12.5, 10.5, 13, 14.5], "texture": "#2"},
+				"up": {"uv": [12.5, 10.5, 13, 11], "texture": "#2"},
+				"down": {"uv": [12.5, 14, 13, 14.5], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_27",
+			"from": [22, 8, -8],
+			"to": [23, 11, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [15.5, 10.5, 15, 12], "texture": "#2"},
+				"east": {"uv": [15, 10.5, 15.5, 12], "texture": "#2"},
+				"south": {"uv": [15, 10.5, 15.5, 12], "texture": "#2"},
+				"west": {"uv": [15, 10.5, 15.5, 12], "texture": "#2"},
+				"up": {"uv": [15, 10.5, 15.5, 11], "texture": "#2"},
+				"down": {"uv": [15, 11.5, 15.5, 12], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_28",
+			"from": [18, 4, -8],
+			"to": [20, 10, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [14, 11, 13, 14], "texture": "#2"},
+				"east": {"uv": [13.5, 11, 14, 14], "texture": "#2"},
+				"south": {"uv": [13, 11, 14, 14], "texture": "#2"},
+				"west": {"uv": [13, 11, 13.5, 14], "texture": "#2"},
+				"up": {"uv": [13, 11, 14, 11.5], "texture": "#2"},
+				"down": {"uv": [13, 13.5, 14, 14], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_29",
+			"from": [20, 7, -8],
+			"to": [21, 8, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [14.5, 12, 14, 12.5], "texture": "#2"},
+				"east": {"uv": [14, 12, 14.5, 12.5], "texture": "#2"},
+				"south": {"uv": [14, 12, 14.5, 12.5], "texture": "#2"},
+				"west": {"uv": [14, 12, 14.5, 12.5], "texture": "#2"},
+				"up": {"uv": [14, 12, 14.5, 12.5], "texture": "#2"},
+				"down": {"uv": [14, 12, 14.5, 12.5], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_30",
+			"from": [20, 2, -8],
+			"to": [21, 5, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [14.5, 13.5, 14, 15], "texture": "#2"},
+				"east": {"uv": [14, 13.5, 14.5, 15], "texture": "#2"},
+				"south": {"uv": [14, 13.5, 14.5, 15], "texture": "#2"},
+				"west": {"uv": [14, 13.5, 14.5, 15], "texture": "#2"},
+				"up": {"uv": [14, 13.5, 14.5, 14], "texture": "#2"},
+				"down": {"uv": [14, 14.5, 14.5, 15], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_31",
+			"from": [12, 2, -8],
+			"to": [14, 4, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [11, 14, 10, 15], "texture": "#2"},
+				"east": {"uv": [10.5, 14, 11, 15], "texture": "#2"},
+				"south": {"uv": [10, 14, 11, 15], "texture": "#2"},
+				"west": {"uv": [10, 14, 10.5, 15], "texture": "#2"},
+				"up": {"uv": [10, 14, 11, 14.5], "texture": "#2"},
+				"down": {"uv": [10, 14.5, 11, 15], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_32",
+			"from": [19, 3, -8],
+			"to": [20, 4, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [14, 14, 13.5, 14.5], "texture": "#2"},
+				"east": {"uv": [13.5, 14, 14, 14.5], "texture": "#2"},
+				"south": {"uv": [13.5, 14, 14, 14.5], "texture": "#2"},
+				"west": {"uv": [13.5, 14, 14, 14.5], "texture": "#2"},
+				"up": {"uv": [13.5, 14, 14, 14.5], "texture": "#2"},
+				"down": {"uv": [13.5, 14, 14, 14.5], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_33",
+			"from": [21, 1, -8],
+			"to": [22, 4, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [15, 14, 14.5, 15.5], "texture": "#2"},
+				"east": {"uv": [14.5, 14, 15, 15.5], "texture": "#2"},
+				"south": {"uv": [14.5, 14, 15, 15.5], "texture": "#2"},
+				"west": {"uv": [14.5, 14, 15, 15.5], "texture": "#2"},
+				"up": {"uv": [14.5, 14, 15, 14.5], "texture": "#2"},
+				"down": {"uv": [14.5, 15, 15, 15.5], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_34",
+			"from": [22, 0, -8],
+			"to": [23, 3, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [15.5, 14.5, 15, 16], "texture": "#2"},
+				"east": {"uv": [15, 14.5, 15.5, 16], "texture": "#2"},
+				"south": {"uv": [15, 14.5, 15.5, 16], "texture": "#2"},
+				"west": {"uv": [15, 14.5, 15.5, 16], "texture": "#2"},
+				"up": {"uv": [15, 14.5, 15.5, 15], "texture": "#2"},
+				"down": {"uv": [15, 15.5, 15.5, 16], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_35",
+			"from": [13, 1, -8],
+			"to": [14, 2, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [11, 15, 10.5, 15.5], "texture": "#2"},
+				"east": {"uv": [10.5, 15, 11, 15.5], "texture": "#2"},
+				"south": {"uv": [10.5, 15, 11, 15.5], "texture": "#2"},
+				"west": {"uv": [10.5, 15, 11, 15.5], "texture": "#2"},
+				"up": {"uv": [10.5, 15, 11, 15.5], "texture": "#2"},
+				"down": {"uv": [10.5, 15, 11, 15.5], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_36",
+			"from": [23, 0, -8],
+			"to": [24, 2, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [16, 15, 15.5, 16], "texture": "#2"},
+				"east": {"uv": [15.5, 15, 16, 16], "texture": "#2"},
+				"south": {"uv": [15.5, 15, 16, 16], "texture": "#2"},
+				"west": {"uv": [15.5, 15, 16, 16], "texture": "#2"},
+				"up": {"uv": [15.5, 15, 16, 15.5], "texture": "#2"},
+				"down": {"uv": [15.5, 15.5, 16, 16], "texture": "#2"}
+			}
+		},
+		{
+			"name": "carnelian_oath_37",
+			"from": [17, 0, -8],
+			"to": [18, 1, -7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [9, 15.25, -7.5]},
+			"faces": {
+				"north": {"uv": [13, 15.5, 12.5, 16], "texture": "#2"},
+				"east": {"uv": [12.5, 15.5, 13, 16], "texture": "#2"},
+				"south": {"uv": [12.5, 15.5, 13, 16], "texture": "#2"},
+				"west": {"uv": [12.5, 15.5, 13, 16], "texture": "#2"},
+				"up": {"uv": [12.5, 15.5, 13, 16], "texture": "#2"},
+				"down": {"uv": [12.5, 15.5, 13, 16], "texture": "#2"}
+			}
+		}
+	],
+	"overrides": [
+		{"predicate": {"blocking": 1}, "model": "exsanguinate:item/carnelian_oath_blocking"}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [33.35, -6, -12],
+			"translation": [-13.75, -2, 17.5]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [-106.83, 10.51, 157.57],
+			"translation": [-11, 16.5, -2.75]
+		},
+		"firstperson_righthand": {
+			"rotation": [6, -5, 34],
+			"translation": [-10, -5.75, 16]
+		},
+		"firstperson_lefthand": {
+			"rotation": [2.08, 14.01, 125.45],
+			"translation": [18, 4.25, 21],
+			"scale": [2, 2, 2]
+		},
+		"ground": {
+			"rotation": [0.72, 13.96, 122.03],
+			"translation": [17.25, 36.5, 19.25],
+			"scale": [1.5, 1.5, 1.5]
+		},
+		"gui": {
+			"translation": [0, -4, 0],
+			"scale": [0.5, 0.5, 0.5]
+		},
+		"head": {
+			"rotation": [10.69, 0.13, 143.96],
+			"translation": [18.25, 1.75, 23.25],
+			"scale": [2, 2, 2]
+		},
+		"fixed": {
+			"rotation": [0, 0, 90],
+			"translation": [6.75, 0.25, 15]
+		},
+		"on_shelf": {
+			"translation": [-4.5, -9, 12.5]
+		}
+	},
+	"groups": [
+		{
+			"name": "carnelian_oath",
+			"origin": [8, 8, 8],
+			"color": 0,
+			"children": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]
+		}
+	]
+}

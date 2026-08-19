@@ -1,3 +1,9 @@
 {
-  "item.exsanguinate.carnelian_oath": "Carnelian Oath"
+  "item.exsanguinate.carnelian_oath": "Carnelian Oath",
+  "item.exsanguinate.blood_infused_iron": "Blood Infused Iron",
+  "item.exsanguinate.carnelian_oath.tooltip.hint": "Hold right-click to infuse the blade (drains 3 hearts)",
+  "item.exsanguinate.carnelian_oath.tooltip.infused": "Infused! Next hit deals %s damage",
+  "subtitles.exsanguinate.sword_swing": "Sword cleaves flesh",
+  "subtitles.exsanguinate.blood_drain": "Blood is drained",
+  "subtitles.exsanguinate.blood_fail": "The sword refuses"
 }
