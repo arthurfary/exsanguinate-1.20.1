@@ -35,8 +35,8 @@ public class BloodFootprintParticle extends SpriteBillboardParticle {
     private static final int LIFETIME_TICKS = 100;
     private static final float FADE_START = 0.6f;
 
-    // Half the footprint's width/length in blocks (0.2 = a 0.4 block print).
-    private static final float SIZE = 0.2f;
+    // Half the footprint's width/length in blocks (0.27 = a 0.54 block print).
+    private static final float SIZE = 0.27f;
 
     // Lays the square flat, toe pointing the way the wielder walked.
     private final Quaternionf rotation;

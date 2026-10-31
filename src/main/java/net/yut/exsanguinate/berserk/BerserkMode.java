@@ -19,10 +19,11 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * BERSERK MODE - the "rage" state the sword puts its wielder in at low health.
+ * BERSERK MODE - the "rage" state the sword puts its wielder in.
  *
- * While the player is at 4 hearts or less AND was in combat recently
- * (dealt or took damage within the last 10 seconds), they are berserk:
+ * Every fed hit with the sword builds RAGE (the hit's full damage, before
+ * armor - see CarnelianOathItem.postHit). Once enough rage has built up in
+ * one fight, the wielder is berserk:
  *
  *  - max health is capped at 4 hearts (with saturation, so they regen up to 4)
  *  - every hit deals bonus damage
@@ -30,18 +31,22 @@ import java.util.UUID;
  *  - they leave bloody footprints, so other players can tell
  *  - their own screen gets a blood vignette (client side, BerserkVignette)
  *
- * The state is computed from two things:
- *  1. the player's health (easy, just read it)
+ * The state is computed from three things:
+ *  1. holding the sword
  *  2. "recently in combat" - a timestamp stamped by the LivingEntityMixin
- *     (damage taken) and PlayerEntityMixin (damage dealt) mixins.
+ *     (damage taken) and PlayerEntityMixin (damage dealt) mixins
+ *  3. rage - reset when the fight ends (10 s without combat) or on death
  *
  * This class is pure server-side logic (the mixins only stamp on the server),
- * but the checks themselves are harmless to call from anywhere.
+ * except the small "client" flag at the bottom, which the client sets from
+ * BerserkStatePayload.
  */
 public final class BerserkMode {
 
-    // Health at or below which berserk turns on (8.0 = 4 hearts).
-    public static final float TRIGGER_HEALTH = 8.0f;
+    // Rage needed to go berserk. A normal fed hit is ~15, a charged (infused)
+    // one ~29: so two charged hits, or one charged + two normal, or four
+    // normal hits. Three normal hits (45) are not enough.
+    public static final float RAGE_THRESHOLD = 55.0f;
 
     // Cap applied to the max-health attribute while berserk (4 hearts).
     private static final float CAP_HEALTH = 8.0f;
@@ -55,15 +60,24 @@ public final class BerserkMode {
     // Extra damage per hit while berserk.
     public static final float BONUS_DAMAGE = 4.0f;
 
-    // Player uuid -> entity age of their last combat event (dealt or took damage).
+    // Player uuid -> world time of their last combat event (dealt or took damage).
+    // World time, not the player's age: age restarts at 0 on respawn.
     private static final Map<UUID, Long> LAST_COMBAT = new HashMap<>();
+
+    // Player uuid -> rage built up in the current fight.
+    private static final Map<UUID, Float> RAGE = new HashMap<>();
+
+    // CLIENT side only: is the local player berserk, as last told by the
+    // server? Lives here (not in a client class) so the shared item code
+    // can read it too.
+    private static boolean clientActive = false;
 
     // ---- Blood footprints (so everyone can see who is berserk) ----
     // Distance walked between two prints, in blocks.
     private static final double STRIDE = 0.8;
 
     // How far each foot lands from the walking line (left/right), in blocks.
-    private static final double FOOT_OFFSET = 0.15;
+    private static final double FOOT_OFFSET = 0.18;
 
     // Where a berserk player left their last print, and with which foot.
     private record Footstep(Vec3d pos, boolean left) {
@@ -79,36 +93,54 @@ public final class BerserkMode {
 
     /**
      * Called when a player disconnects. Drops everything we remember about
-     * them, so a rejoin starts clean: their client starts with no vignette,
-     * and their combat timestamp (an entity age, which restarts at 0 on
-     * rejoin) can't keep them berserk by mistake.
+     * them, so a rejoin starts clean: no leftover rage, and their client
+     * (which starts with no vignette) gets told again if they are berserk.
      */
     public static void forget(PlayerEntity player) {
         LAST_COMBAT.remove(player.getUuid());
+        RAGE.remove(player.getUuid());
         LAST_FOOTSTEP.remove(player.getUuid());
         BERSERK_PLAYERS.remove(player.getUuid());
     }
 
     /**
      * Called by the mixins whenever the player deals or takes damage.
-     * Stamps the current entity age so isActive() knows combat just happened.
+     * Stamps the current time so isActive() knows combat just happened.
      */
     public static void onCombat(PlayerEntity player) {
-        LAST_COMBAT.put(player.getUuid(), (long) player.age);
+        LAST_COMBAT.put(player.getUuid(), player.getWorld().getTime());
+    }
+
+    /** Called by the sword after every fed hit, with that hit's damage. */
+    public static void addRage(PlayerEntity player, float damage) {
+        RAGE.merge(player.getUuid(), damage, Float::sum);
     }
 
     /**
      * Is this player currently berserk?
-     * Wielding the sword AND low health AND in combat within the last 10 seconds.
-     * (Without the sword check, any player at low health would get their max
-     * health capped, sword or not.)
+     * Wielding the sword AND in combat within the last 10 seconds AND enough
+     * rage built up in this fight. (Without the sword check, the health cap
+     * would follow the player even with the sword put away.)
      */
     public static boolean isActive(PlayerEntity player) {
-        if (!player.getMainHandStack().isOf(ModItems.CARNELIAN_OATH) || player.getHealth() > TRIGGER_HEALTH) {
-            return false;
-        }
+        return player.getMainHandStack().isOf(ModItems.CARNELIAN_OATH)
+                && inCombat(player)
+                && RAGE.getOrDefault(player.getUuid(), 0.0f) >= RAGE_THRESHOLD;
+    }
+
+    private static boolean inCombat(PlayerEntity player) {
         Long lastCombat = LAST_COMBAT.get(player.getUuid());
-        return lastCombat != null && player.age - lastCombat < AWAY_FROM_COMBAT_TICKS;
+        return lastCombat != null && player.getWorld().getTime() - lastCombat < AWAY_FROM_COMBAT_TICKS;
+    }
+
+    /** Client side: the server says the local player is (not) berserk. */
+    public static void setClientActive(boolean active) {
+        clientActive = active;
+    }
+
+    /** Client side: is the local player berserk? */
+    public static boolean isClientActive() {
+        return clientActive;
     }
 
     /**
@@ -120,6 +152,11 @@ public final class BerserkMode {
         // Only the server may change attributes, effects and health.
         if (player.getWorld().isClient) {
             return;
+        }
+
+        // The fight is over (or the player died): the rage cools off.
+        if (!inCombat(player) || !player.isAlive()) {
+            RAGE.remove(player.getUuid());
         }
 
         boolean active = isActive(player);

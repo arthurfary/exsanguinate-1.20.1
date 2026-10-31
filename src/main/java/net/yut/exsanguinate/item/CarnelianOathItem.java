@@ -409,6 +409,11 @@ public class CarnelianOathItem extends SwordItem {
         if (!target.getWorld().isClient && attacker instanceof PlayerEntity player) {
             ServerWorld serverWorld = (ServerWorld) target.getWorld();
 
+            // The full force of this swing (player + blade + blood bonus),
+            // read before the bonus is removed. Before armor, on purpose:
+            // hitting an armored player builds rage as fast as hitting a mob.
+            float swingDamage = (float) player.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+
             // The bonus is only on the player if register() judged this swing
             // a committed one - spam clicks are plain, dull hits.
             boolean struck = clearStrike(player);
@@ -425,6 +430,8 @@ public class CarnelianOathItem extends SwordItem {
 
             if (fed) {
                 impact(serverWorld, target, player, infused);
+                // Fed hits build rage; enough of it and the wielder goes berserk.
+                BerserkMode.addRage(player, swingDamage);
             } else if (player.getHealth() <= BLOOD_COST) {
                 // Too weak to pay: the swing connects, but the blade refuses.
                 serverWorld.playSound(null, player.getBlockPos(), ModSounds.BLOOD_FAIL,
@@ -505,17 +512,19 @@ public class CarnelianOathItem extends SwordItem {
     // ======================== HELPERS ========================
 
     /**
-     * Berserk check that also works from the client side. The combat
-     * timestamps only exist on the server, so the client approximates the
-     * state with the low-health check alone. That keeps client and server in
-     * agreement about costs and timers (minor cosmetic differences are fine).
+     * Berserk check that also works from the client side. Rage and combat
+     * timers only exist on the server, so the client uses what the server
+     * last told it about its OWN player (BerserkStatePayload). That keeps
+     * client and server in agreement about infusion costs and charge time.
      */
     private static boolean isBerserk(LivingEntity user, World world) {
         if (!(user instanceof PlayerEntity player)) {
             return false;
         }
-        return BerserkMode.isActive(player)
-                || (world.isClient && player.getHealth() <= BerserkMode.TRIGGER_HEALTH);
+        if (world.isClient) {
+            return player.isMainPlayer() && BerserkMode.isClientActive();
+        }
+        return BerserkMode.isActive(player);
     }
 
     /**
@@ -534,8 +543,8 @@ public class CarnelianOathItem extends SwordItem {
     }
 
     /**
-     * Spawns an explosion of red particles (crimson spores + bright sparks)
-     * at a position - used for the infusion ritual and the infused hit.
+     * Spawns a burst of red crimson spores at a position - used for the
+     * infusion ritual, the refusal and the infused hit.
      */
     private static void spawnParticleBurst(ServerWorld world, Vec3d pos, int count) {
         for (int i = 0; i < count; i++) {
@@ -544,13 +553,6 @@ public class CarnelianOathItem extends SwordItem {
                     Math.random() * 0.4 + 0.1,
                     (Math.random() - 0.5) * 0.3,
                     0.1);
-        }
-        for (int i = 0; i < count / 2; i++) {
-            world.spawnParticles(ParticleTypes.FIREWORK, pos.x, pos.y, pos.z, 1,
-                    (Math.random() - 0.5) * 0.5,
-                    Math.random() * 0.5,
-                    (Math.random() - 0.5) * 0.5,
-                    0.05);
         }
     }
 }

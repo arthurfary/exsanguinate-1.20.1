@@ -8,6 +8,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.yut.exsanguinate.Exsanguinate;
+import net.yut.exsanguinate.berserk.BerserkMode;
 
 /**
  * BLOOD VIGNETTE - red, grainy screen edges while the player is berserk.
@@ -41,9 +42,6 @@ public class BerserkVignette {
 
     private static final Identifier TEXTURE = new Identifier(Exsanguinate.MOD_ID, "textures/misc/blood_vignette.png");
 
-    // Is the player berserk right now (as last told by the server)?
-    private static boolean active = false;
-
     // 0.0 = invisible, 1.0 = fully shown. "prev" is last tick's value, so the
     // animation can be smoothed between ticks (every frame, not every tick).
     private static float progress = 0.0f;
@@ -52,14 +50,17 @@ public class BerserkVignette {
     private BerserkVignette() {
     }
 
-    /** Called (via packet) when berserk starts or ends. */
+    /**
+     * Called (via packet) when berserk starts or ends. The flag itself lives
+     * in BerserkMode, so the sword's code can see it too.
+     */
     public static void setActive(boolean berserk) {
-        active = berserk;
+        BerserkMode.setClientActive(berserk);
     }
 
     /** Is the player berserk right now? (BerserkSounds asks.) */
     public static boolean isActive() {
-        return active;
+        return BerserkMode.isClientActive();
     }
 
     /**
@@ -72,7 +73,7 @@ public class BerserkVignette {
 
     /** Called on disconnect: never carry a vignette into the next world. */
     public static void reset() {
-        active = false;
+        BerserkMode.setClientActive(false);
         progress = 0.0f;
         prevProgress = 0.0f;
     }
@@ -80,7 +81,7 @@ public class BerserkVignette {
     /** Called once per client tick: moves the animation along. */
     public static void tick() {
         prevProgress = progress;
-        progress = active
+        progress = isActive()
                 ? Math.min(1.0f, progress + 1.0f / FADE_IN_TICKS)
                 : Math.max(0.0f, progress - 1.0f / FADE_OUT_TICKS);
     }

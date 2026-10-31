@@ -23,11 +23,13 @@ A heavy blood-ritual blade with a few mechanics:
   next full swing deals +24 damage instead of the normal bonus, then the
   charge is consumed. Completing the ritual flashes the screen black & white
   for a second and plays a short "charged" cue.
-- **Berserk mode** - while holding the sword at 4 hearts or less, in combat,
-  the wielder enters a rage state: max health is capped at 4 hearts (with
-  saturation to regen up to it), every full swing deals +4 damage, and the
-  infusion only costs 1 heart and half the time. Wears off 10 s after the
-  last combat. A berserk wielder leaves bloody footprints (alternating feet,
+- **Berserk mode** - every fed hit builds rage (the hit's damage before
+  armor). At 55 rage in one fight - two charged hits, one charged + two
+  normal, or four normal - the wielder enters a rage state: max health is
+  capped at 4 hearts (with saturation to regen up to it), every full swing
+  deals +4 damage, and the infusion only costs 1 heart and half the time.
+  Wears off 10 s after the last combat (or when the sword is put away);
+  rage resets after 10 s out of combat or on death. A berserk wielder leaves bloody footprints (alternating feet,
   fading after 5 s) that every nearby player can see, and sees a blood
   vignette on their own screen: it fades in zooming out from the center and
   fades out zooming back in. They also hear (only them) a low lub-dub

@@ -35,7 +35,7 @@ public class BerserkSounds {
     public static final int DUB_DELAY_TICKS = 6;
 
     /** Loudness of the heartbeat (the "dub" is a bit softer). */
-    public static final float HEARTBEAT_VOLUME = 0.6f;
+    public static final float HEARTBEAT_VOLUME = 0.45f;
 
     /** Pitch of the heartbeat. Lower = deeper (0.5 is the lowest). */
     public static final float HEARTBEAT_PITCH = 0.6f;
