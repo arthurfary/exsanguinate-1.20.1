@@ -10,7 +10,8 @@
 	],
 	"client": [
 		"GameRendererAccessor",
-		"GameRendererMixin"
+		"GameRendererMixin",
+		"InGameHudMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

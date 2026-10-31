@@ -1,9 +1,15 @@
 {
   "item.exsanguinate.carnelian_oath": "Carnelian Oath",
   "item.exsanguinate.blood_infused_iron": "Blood Infused Iron",
+  "item.exsanguinate.carnelian_oath.tooltip.strike": "Full swings cost 1 heart and deal +%s damage",
+  "item.exsanguinate.carnelian_oath.tooltip.wound": "Spent blood won't heal back for 5 seconds",
   "item.exsanguinate.carnelian_oath.tooltip.hint": "Hold right-click to infuse the blade (drains 3 hearts)",
-  "item.exsanguinate.carnelian_oath.tooltip.infused": "Infused! Next hit deals %s damage",
+  "item.exsanguinate.carnelian_oath.tooltip.infused": "Infused! Next full swing deals %s damage",
+  "effect.exsanguinate.blood_curse": "Blood Curse",
   "subtitles.exsanguinate.sword_swing": "Sword cleaves flesh",
   "subtitles.exsanguinate.blood_drain": "Blood is drained",
-  "subtitles.exsanguinate.blood_fail": "The sword refuses"
+  "subtitles.exsanguinate.blood_fail": "The sword refuses",
+  "subtitles.exsanguinate.berserk_heartbeat": "Heart pounds",
+  "subtitles.exsanguinate.berserk_ambience": "Blood rings in your ears",
+  "subtitles.exsanguinate.infusion_charged": "Blade is charged"
 }

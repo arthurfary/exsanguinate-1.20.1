@@ -23,7 +23,7 @@ public class ModItems {
     // Making it public and static lets any other class reference it
     // (e.g. ModItemTagProvider adds it to a tag).
     public static final Item CARNELIAN_OATH = registerItem("carnelian_oath",
-            new CarnelianOathItem(ToolMaterials.NETHERITE, 5, -3.2f, new Item.Settings()));
+            new CarnelianOathItem(ToolMaterials.NETHERITE, 0, -3.2f, new Item.Settings()));
 
     // Crafting ingredient for the sword: iron "soaked" in blood (see recipes).
     public static final Item BLOOD_INFUSED_IRON = registerItem("blood_infused_iron", new Item(new Item.Settings()));
@@ -39,10 +39,13 @@ public class ModItems {
     /**
      * Called from Exsanguinate.onInitialize().
      * The item itself was already registered by the static field above, so this
-     * only adds the sword to the vanilla "Combat" creative tab.
+     * hooks up the sword's blood strike and adds it to the vanilla "Combat"
+     * creative tab.
      */
     public static void registerModItems() {
         Exsanguinate.LOGGER.info("Registering mod items for " + Exsanguinate.MOD_ID);
+
+        CarnelianOathItem.register();
 
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.COMBAT).register(fabricItemGroupEntries -> {
             fabricItemGroupEntries.add(CARNELIAN_OATH);

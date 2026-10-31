@@ -1,49 +1,75 @@
 package net.yut.exsanguinate.item;
 
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.EntityAttributeInstance;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterial;
+import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
+import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.yut.exsanguinate.berserk.BerserkMode;
+import net.yut.exsanguinate.effect.ModEffects;
 import net.yut.exsanguinate.mixin.LivingEntityAccessor;
 import net.yut.exsanguinate.network.InfusionCompletePayload;
 import net.yut.exsanguinate.sound.ModSounds;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
 
 /**
- * The Carnelian Oath - the mod's only sword. It has two mechanics:
+ * The Carnelian Oath - a heavy blade that is only sharp when it is fed.
  *
- * 1. LIFE DRAIN: every hit costs the player health. "Exsanguinate" means
- *    "to drain of blood" - the sword feeds on its own wielder.
+ * 1. BLOOD STRIKE: the blade itself is dull (see ModItems). A full-power
+ *    swing pays 1 heart and, in exchange, bites for a lot of extra damage.
+ *    Too weak to pay (1 heart or less)? The blade refuses and stays dull.
  *
- * 2. INFUSION: hold right click for 2 seconds to "infuse" the sword with
- *    blood (costs 3 hearts). While infused the sword glows like an enchanted
- *    item, and the next hit deals massive bonus damage, then the infusion
- *    is consumed.
+ * 2. INFUSION: hold right click for 2 seconds to pay 3 hearts up front.
+ *    The next full swing is a crushing blow: far more damage, a huge shove
+ *    and a violent camera kick. The infusion is consumed by that swing.
+ *
+ * Every fed hit is made to feel heavy: knockback, a low thud, a spray of
+ * blood, a camera kick (client side, see ScreenShake) and a short recovery
+ * slowdown for the wielder, who is committed to the swing.
  */
 public class CarnelianOathItem extends SwordItem {
 
-    // ---- Life drain ----
+    // ---- Blood strike ----
     // Health is in half-hearts, so 2.0 = 1 heart.
-    private static final float LIFE_DRAIN_AMOUNT = 2.0f;
+    private static final float BLOOD_COST = 2.0f;
+
+    // Extra damage of a fed swing (the blade alone deals ~5, so 15 fed).
+    private static final float BLOOD_BONUS = 10.0f;
+
+    // A swing only counts as a committed "full swing" (and only then feeds
+    // the blade) once the attack cooldown is this charged. Spam-clicking
+    // gets you the dull, weak hit and costs nothing.
+    public static final float READY = 0.9f;
 
     // ---- Infusion ----
     // 3 hearts = 6.0 health. The player must have MORE than this to infuse,
@@ -55,37 +81,117 @@ public class CarnelianOathItem extends SwordItem {
     private static final float BERSERK_HEALTH_COST = 2.0f;
     private static final int BERSERK_INFUSION_TIME_TICKS = 20;
 
-    // Bonus damage dealt by an infused hit (8 extra = double the sword's damage).
-    private static final float INFUSED_EXTRA_DAMAGE = 8.0f;
+    // Extra damage of the infused swing. It replaces the blood strike bonus
+    // (the blood was already paid by the ritual, so the swing is free).
+    private static final float INFUSED_BONUS = 24.0f;
 
     // 2 seconds = 40 ticks (Minecraft runs 20 ticks per second).
     private static final int INFUSION_TIME_TICKS = 40;
+
+    // After paying blood, natural healing stops for this long (100 = 5 s).
+    // Every payment restarts it, so it stays open for a whole fight.
+    private static final int WOUND_TICKS = 100;
 
     // NBT key that remembers "this sword is currently infused".
     // NBT travels with the item stack, so both client and server see it.
     private static final String INFUSED_KEY = "Infused";
 
-    // ---- Slash particles ----
-    private static final double SLASH_RANGE = 8.0;
-    private static final int SLASH_LINES = 8;
-    private static final int PARTICLES_PER_LINE = 15;
-    private static final double LINE_WIDTH = 1.6;
-    private static final double TILT_ANGLE = 25.0;
+    // ---- Weight (tweak these to change how the hits feel) ----
+    // Loudness of the whole impact sound stack (1.0 = full, 0.5 = half).
+    private static final float IMPACT_VOLUME = 0.6f;
+
+    // Extra shove on a fed hit, on top of vanilla knockback.
+    private static final double KNOCKBACK = 0.9;
+    private static final double INFUSED_KNOCKBACK = 2.0;
+
+    // The wielder is slowed briefly after a fed hit: heavy blades have
+    // recovery. Set to 0 to disable.
+    private static final int RECOVERY_TICKS = 10;
+    private static final int INFUSED_RECOVERY_TICKS = 20;
+
+    // Id of the temporary attack-damage modifier that carries the bonus into
+    // the vanilla hit (see register). Only exists for the length of one swing.
+    private static final UUID STRIKE_ID = UUID.fromString("5c1f6a3e-8b0d-4e47-9a52-3d7b1c0e9f24");
 
     /**
      * Constructor parameters, explained for learners:
      *
      * - toolMaterial : decides base durability, mining speed, and a base attack
-     *                  damage bonus. ToolMaterials.NETHERITE = 2031 durability.
+     *                  damage bonus. ToolMaterials.NETHERITE = 2031 durability
+     *                  and +4 damage.
      * - attackDamage : ADDED to the material's base attack damage. Netherite
-     *                  gives +3, so this sword deals 3 + 5 = 8 damage per hit
-     *                  (the same as a vanilla netherite sword).
+     *                  gives +4, so the blade alone deals 4 + 0 = 4 (5 with the
+     *                  player's own 1). Everything above that is paid in blood.
      * - attackSpeed  : ADDED to the base value of 4.0. 4.0 + (-3.2) = 0.8
      *                  attacks per second, so it swings very slowly - it is
      *                  a heavy blood ritual blade.
      */
     public CarnelianOathItem(ToolMaterial toolMaterial, int attackDamage, float attackSpeed, Settings settings) {
         super(toolMaterial, attackDamage, attackSpeed, settings);
+    }
+
+    // ======================== BLOOD STRIKE ========================
+
+    /**
+     * Called once from ModItems.registerModItems().
+     *
+     * Why an event + a temporary attribute? Vanilla works out the hit's damage
+     * from the attacker's attack-damage attribute BEFORE it hits. If we tried to
+     * add damage afterwards (in postHit), the target's invulnerability frames
+     * would swallow it. So just before the swing resolves we hand the player a
+     * temporary damage bonus; vanilla then does all the rest (cooldown scaling,
+     * critical hits, armor...). postHit removes it again, and so does
+     * inventoryTick as a safety net for swings that never landed.
+     */
+    public static void register() {
+        AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
+            ItemStack stack = player.getMainHandStack();
+            if (world.isClient || !(entity instanceof LivingEntity) || !stack.isOf(ModItems.CARNELIAN_OATH)
+                    || player.getAttackCooldownProgress(0.5f) < READY) {
+                return ActionResult.PASS;
+            }
+
+            float bonus = bloodBonus(player, stack) + (isBerserk(player, world) ? BerserkMode.BONUS_DAMAGE : 0.0f);
+            if (bonus > 0.0f) {
+                clearStrike(player);
+                player.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE).addTemporaryModifier(
+                        new EntityAttributeModifier(STRIKE_ID, "Blood strike", bonus, EntityAttributeModifier.Operation.ADDITION));
+            }
+            return ActionResult.PASS;
+        });
+    }
+
+    /**
+     * How much extra damage the blood buys right now: the infused bonus,
+     * the normal bonus if the wielder can afford the heart, or nothing.
+     * Public because the client uses it too (to decide on the camera kick).
+     */
+    public static float bloodBonus(PlayerEntity player, ItemStack stack) {
+        if (isInfused(stack)) {
+            return INFUSED_BONUS;
+        }
+        return player.getHealth() > BLOOD_COST ? BLOOD_BONUS : 0.0f;
+    }
+
+    /** Removes the temporary damage bonus. Returns true if it was there. */
+    private static boolean clearStrike(PlayerEntity player) {
+        // Not tryRemoveModifier: that one only removes PERSISTENT modifiers.
+        EntityAttributeInstance attackDamage = player.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+        if (attackDamage.getModifier(STRIKE_ID) == null) {
+            return false;
+        }
+        attackDamage.removeModifier(STRIKE_ID);
+        return true;
+    }
+
+    /**
+     * Takes the blood. The wound stays open for a while (Blood Curse): no
+     * natural healing until it closes, so the price actually sticks instead
+     * of being healed back by a full food bar a second later.
+     */
+    private static void payBlood(PlayerEntity player, float cost) {
+        player.setHealth(player.getHealth() - cost);
+        player.addStatusEffect(new StatusEffectInstance(ModEffects.BLOOD_CURSE, WOUND_TICKS, 0));
     }
 
     // ======================== INFUSION ========================
@@ -119,13 +225,8 @@ public class CarnelianOathItem extends SwordItem {
             return TypedActionResult.fail(stack);
         }
 
-        // Start the drain: low heartbeat-like thump as the blood flows.
-        if (!world.isClient) {
-            world.playSound(null, user.getBlockPos(), ModSounds.BLOOD_DRAIN,
-                    SoundCategory.PLAYERS, 0.7f, 0.9f);
-        }
-
         // Start using the item (like drawing a bow or raising a shield).
+        // The heartbeat starts on the first usageTick.
         user.setCurrentHand(hand);
         return TypedActionResult.pass(stack);
     }
@@ -141,7 +242,7 @@ public class CarnelianOathItem extends SwordItem {
     /**
      * BLOCK = the old "blocking" pose: the sword is held in front of the face,
      * exactly like the pre-1.9 blocking animation (now used by shields).
-     * It also gives knockback resistance while charging.
+     * It also slows the wielder to a crawl while charging.
      */
     @Override
     public UseAction getUseAction(ItemStack stack) {
@@ -150,13 +251,15 @@ public class CarnelianOathItem extends SwordItem {
 
     /**
      * Called every tick while the player holds right click.
-     * We spawn red particles around the player so it's obvious the infusion
-     * is charging. Client-side only, so the effect renders locally and never
-     * gets doubled by the server broadcasting it too.
      *
-     * On the SERVER side there is a second job: while berserk, the charge is
-     * shortened to 1 second. We simply pull the use timer down to the berserk
-     * maximum - the ticking loop counts it down from there.
+     * Server side: a heartbeat thump that gets louder, higher and faster as the
+     * charge builds, so the ritual feels like the blood is being pulled out.
+     * Client side: red particles around the player (rendered locally, so they
+     * never get doubled by the server broadcasting them too).
+     *
+     * While berserk, the charge is also shortened to 1 second. We simply pull
+     * the use timer down to the berserk maximum - the ticking loop counts it
+     * down from there.
      */
     @Override
     public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
@@ -173,12 +276,18 @@ public class CarnelianOathItem extends SwordItem {
             }
         }
 
-        // Particles: client-only, so the effect renders locally and never gets
-        // doubled by the server broadcasting it too.
-        if (world.isClient) {
-            // progress goes from 0.0 (just started) to 1.0 (about to finish).
+        // progress goes from 0.0 (just started) to 1.0 (about to finish).
+        float progress = 1.0f - (float) remainingUseTicks / INFUSION_TIME_TICKS;
+
+        if (!world.isClient) {
+            // One thump every 10 ticks, every 5 once the charge is half done.
+            int elapsed = INFUSION_TIME_TICKS - remainingUseTicks;
+            if (elapsed % (elapsed < 20 ? 10 : 5) == 0) {
+                world.playSound(null, player.getBlockPos(), ModSounds.BLOOD_DRAIN,
+                        SoundCategory.PLAYERS, 0.5f + progress * 0.4f, 0.7f + progress * 0.6f);
+            }
+        } else {
             // More particles spawn as the charge completes, so you can SEE the progress.
-            float progress = 1.0f - (float) remainingUseTicks / INFUSION_TIME_TICKS;
             int particleCount = 1 + (int) (progress * 3);
 
             for (int i = 0; i < particleCount; i++) {
@@ -208,12 +317,15 @@ public class CarnelianOathItem extends SwordItem {
 
             if (player.getHealth() > cost) {
                 // Pay the blood price and mark the sword as infused.
-                player.setHealth(player.getHealth() - cost);
+                payBlood(player, cost);
                 setInfused(stack, true);
 
-                // The drain completes with a higher, bloodier thump + burst.
+                // The drain completes with a higher, bloodier thump + burst,
+                // and a short "charged" cue so you know the blade is ready.
                 serverWorld.playSound(null, player.getBlockPos(), ModSounds.BLOOD_DRAIN,
                         SoundCategory.PLAYERS, 0.9f, 1.2f);
+                serverWorld.playSound(null, player.getBlockPos(), ModSounds.INFUSION_CHARGED,
+                        SoundCategory.PLAYERS, 0.8f, 1.0f);
                 spawnParticleBurst(serverWorld, player.getPos().add(0, 1.5, 0), 30);
 
                 // Tell the client "infusion done" so it can flash the screen
@@ -253,12 +365,21 @@ public class CarnelianOathItem extends SwordItem {
 
     /**
      * Called every tick while the item is anywhere in the player's inventory.
-     * While the infused sword is selected, ambient red particles drift around
-     * the player so the charged state is always visible.
+     *
+     * Server: drops a leftover blood strike bonus, in case a swing never
+     * landed (the target was invulnerable) and postHit never ran.
+     * Client: while the infused sword is selected, ambient red particles drift
+     * around the player so the charged state is always visible.
      */
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
-        if (!world.isClient || !selected || !isInfused(stack)) {
+        if (!world.isClient) {
+            if (entity instanceof PlayerEntity player) {
+                clearStrike(player);
+            }
+            return;
+        }
+        if (!selected || !isInfused(stack)) {
             return;
         }
 
@@ -277,64 +398,86 @@ public class CarnelianOathItem extends SwordItem {
     // ======================== HITTING THINGS ========================
 
     /**
-     * Called whenever this item is used to hit an entity (on both sides).
+     * Called by vanilla AFTER a hit landed on the main target (server only in
+     * practice - the client never gets a successful damage() back).
+     *
+     * The extra damage was already dealt (see register); this is where the
+     * wielder pays for it and where the hit gets its weight.
      */
     @Override
     public boolean postHit(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-
-        // ---- 0. Infused hit: a charged sword delivers a massive strike ----
-        // The infusion is consumed by the first hit.
-        boolean infusedHit = !target.getWorld().isClient && isInfused(stack);
-        if (infusedHit) {
-            setInfused(stack, false);
-
-            ServerWorld serverWorld = (ServerWorld) target.getWorld();
-
-            // Deal the extra damage on top of the normal hit.
-            if (attacker instanceof PlayerEntity player) {
-                target.damage(serverWorld.getDamageSources().playerAttack(player), INFUSED_EXTRA_DAMAGE);
-            }
-
-            // Big blood burst at the target so the hit clearly reads as special.
-            spawnParticleBurst(serverWorld, target.getPos().add(0, target.getHeight() * 0.5, 0), 24);
-        }
-
-        // ---- 1. Life drain + berserk: these only run on the SERVER ----
-        // The server is the "authority" of the world. When the server spawns a
-        // particle or plays a sound, Minecraft automatically broadcasts it to
-        // all nearby clients. Doing this on the client too would double it.
         if (!target.getWorld().isClient && attacker instanceof PlayerEntity player) {
             ServerWorld serverWorld = (ServerWorld) target.getWorld();
 
-            // Berserk rage: every hit deals bonus damage on top of the normal hit.
-            if (BerserkMode.isActive(player)) {
-                target.damage(serverWorld.getDamageSources().playerAttack(player), BerserkMode.BONUS_DAMAGE);
+            // The bonus is only on the player if register() judged this swing
+            // a committed one - spam clicks are plain, dull hits.
+            boolean struck = clearStrike(player);
+            boolean infused = struck && isInfused(stack);
+            // Re-check the price: thorns & co. may have hurt the wielder since.
+            boolean fed = struck && (infused || player.getHealth() > BLOOD_COST);
+
+            if (infused) {
+                // The blood was paid by the ritual; the swing only consumes it.
+                setInfused(stack, false);
+            } else if (fed) {
+                payBlood(player, BLOOD_COST);
             }
 
-            // The sword feeds on the wielder's blood with every hit...
-            boolean drained = player.getHealth() > LIFE_DRAIN_AMOUNT;
-            if (drained) {
-                player.setHealth(player.getHealth() - LIFE_DRAIN_AMOUNT);
-
-                // Infused hits get a deeper, heavier sound.
-                float pitch = infusedHit ? 0.6f : 0.9f + serverWorld.random.nextFloat() * 0.2f;
-                serverWorld.playSound(null, attacker.getBlockPos(), ModSounds.SWORD_SWING,
-                        SoundCategory.PLAYERS, 0.7f, pitch);
-
-                // Spawn the red slash arc in the direction the attacker is looking.
-                spawnSlashParticles(serverWorld, attacker);
-            } else {
-                // ...but if the wielder is too weak, the syphon MISSES:
-                // the swing still connects normally, it just takes no blood,
-                // and the sword gives a dull "refusal" thud instead.
-                serverWorld.playSound(null, attacker.getBlockPos(), ModSounds.BLOOD_FAIL,
+            if (fed) {
+                impact(serverWorld, target, player, infused);
+            } else if (player.getHealth() <= BLOOD_COST) {
+                // Too weak to pay: the swing connects, but the blade refuses.
+                serverWorld.playSound(null, player.getBlockPos(), ModSounds.BLOOD_FAIL,
                         SoundCategory.PLAYERS, 0.8f, 1.2f);
                 spawnParticleBurst(serverWorld, player.getPos().add(0, 1.5, 0), 4);
             }
         }
 
-        // Let the vanilla sword logic run too (durability damage, sweep attack...).
+        // Let the vanilla sword logic run too (durability damage...).
         return super.postHit(stack, target, attacker);
+    }
+
+    /**
+     * Everything that makes a fed hit feel heavy: a shove, layered low sounds,
+     * a spray of blood and a recovery slowdown. The camera kick is client
+     * side (ScreenShake), triggered by the client's own attack event.
+     */
+    private static void impact(ServerWorld world, LivingEntity target, PlayerEntity player, boolean infused) {
+        Vec3d at = target.getPos().add(0, target.getHeight() * 0.5, 0);
+
+        // Shove the target away from the wielder (same formula vanilla uses).
+        float yaw = player.getYaw() * MathHelper.RADIANS_PER_DEGREE;
+        target.takeKnockback(infused ? INFUSED_KNOCKBACK : KNOCKBACK, MathHelper.sin(yaw), -MathHelper.cos(yaw));
+        // Vanilla already synced player targets before postHit ran, so
+        // push the extra velocity out ourselves.
+        if (target instanceof ServerPlayerEntity hit) {
+            hit.networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(hit));
+        }
+
+        // Three low layers: the heartbeat thump, a deep body-blow and the cleave.
+        world.playSound(null, at.x, at.y, at.z, ModSounds.BLOOD_DRAIN, SoundCategory.PLAYERS,
+                IMPACT_VOLUME, infused ? 0.5f : 0.75f);
+        world.playSound(null, at.x, at.y, at.z, SoundEvents.ENTITY_WARDEN_ATTACK_IMPACT, SoundCategory.PLAYERS,
+                IMPACT_VOLUME * (infused ? 1.0f : 0.7f), infused ? 0.8f : 1.1f);
+        world.playSound(null, at.x, at.y, at.z, ModSounds.SWORD_SWING, SoundCategory.PLAYERS,
+                IMPACT_VOLUME * 0.7f, infused ? 0.6f : 0.9f + world.random.nextFloat() * 0.2f);
+        if (infused) {
+            world.playSound(null, at.x, at.y, at.z, SoundEvents.BLOCK_ANVIL_LAND, SoundCategory.PLAYERS,
+                    IMPACT_VOLUME * 0.8f, 0.5f);
+        }
+
+        // Block-break particles of a redstone block look like flying gore.
+        world.spawnParticles(new BlockStateParticleEffect(ParticleTypes.BLOCK, Blocks.REDSTONE_BLOCK.getDefaultState()),
+                at.x, at.y, at.z, infused ? 70 : 28, 0.3, 0.4, 0.3, 0.15);
+        if (infused) {
+            spawnParticleBurst(world, at, 24);
+        }
+
+        // Recovery: you put your whole body into that swing.
+        int recovery = infused ? INFUSED_RECOVERY_TICKS : RECOVERY_TICKS;
+        if (recovery > 0) {
+            player.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, recovery, 2, false, false, false));
+        }
     }
 
     // ======================== TOOLTIP ========================
@@ -346,12 +489,15 @@ public class CarnelianOathItem extends SwordItem {
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
         if (isInfused(stack)) {
-            // Example of the damage the infused blade will yield:
-            // normal sword damage + the infused bonus.
-            float damage = getAttackDamage() + INFUSED_EXTRA_DAMAGE;
+            // Example of the damage the infused blade will yield: the player's
+            // own 1 + the blade + the infused bonus.
+            float damage = 1.0f + getAttackDamage() + INFUSED_BONUS;
             tooltip.add(Text.translatable("item.exsanguinate.carnelian_oath.tooltip.infused",
                     String.format("%.1f", damage)).formatted(Formatting.RED));
         } else {
+            tooltip.add(Text.translatable("item.exsanguinate.carnelian_oath.tooltip.strike",
+                    String.format("%.0f", BLOOD_BONUS)).formatted(Formatting.DARK_RED));
+            tooltip.add(Text.translatable("item.exsanguinate.carnelian_oath.tooltip.wound").formatted(Formatting.GRAY));
             tooltip.add(Text.translatable("item.exsanguinate.carnelian_oath.tooltip.hint").formatted(Formatting.GRAY));
         }
     }
@@ -376,7 +522,7 @@ public class CarnelianOathItem extends SwordItem {
      * Reads the "infused" flag from the item's NBT.
      * hasNbt() check avoids creating an empty NBT compound on every read.
      */
-    private static boolean isInfused(ItemStack stack) {
+    public static boolean isInfused(ItemStack stack) {
         return stack.hasNbt() && stack.getNbt().getBoolean(INFUSED_KEY);
     }
 
@@ -391,7 +537,7 @@ public class CarnelianOathItem extends SwordItem {
      * Spawns an explosion of red particles (crimson spores + bright sparks)
      * at a position - used for the infusion ritual and the infused hit.
      */
-    private void spawnParticleBurst(ServerWorld world, Vec3d pos, int count) {
+    private static void spawnParticleBurst(ServerWorld world, Vec3d pos, int count) {
         for (int i = 0; i < count; i++) {
             world.spawnParticles(ParticleTypes.CRIMSON_SPORE, pos.x, pos.y, pos.z, 1,
                     (Math.random() - 0.5) * 0.3,
@@ -405,57 +551,6 @@ public class CarnelianOathItem extends SwordItem {
                     Math.random() * 0.5,
                     (Math.random() - 0.5) * 0.5,
                     0.05);
-        }
-    }
-
-    /**
-     * Spawns a tilted arc of particles in front of the attacker, like a slash.
-     *
-     * How it works:
-     *  1. Find where the attacker is looking (direction + eye position).
-     *  2. Calculate a direction perpendicular to the look direction (to the side).
-     *  3. Tilt that perpendicular 25 degrees up or down, so the arc is slanted.
-     *  4. Draw SLASH_LINES particle rows, each one further away, forming a
-     *     slanted "wall" of particles that reads as a sword slash.
-     */
-    private void spawnSlashParticles(ServerWorld world, LivingEntity attacker) {
-        Vec3d lookDirection = attacker.getRotationVec(1.0f).normalize();
-        Vec3d eyePosition = attacker.getPos().add(0, attacker.getEyeHeight(attacker.getPose()), 0);
-
-        // Sideways direction, perpendicular to where the attacker is looking.
-        Vec3d horizontalPerpendicular = lookDirection.crossProduct(new Vec3d(0, 1, 0)).normalize();
-
-        // Randomly tilt the arc up or down so every hit looks slightly different.
-        double randomTiltDirection = Math.random() > 0.5 ? 1.0 : -1.0;
-        double tiltAngleRadians = Math.toRadians(TILT_ANGLE) * randomTiltDirection;
-
-        double cosTilt = Math.cos(tiltAngleRadians);
-        double sinTilt = Math.sin(tiltAngleRadians);
-        Vec3d tiltedPerpendicular = new Vec3d(
-                horizontalPerpendicular.x * cosTilt - horizontalPerpendicular.z * sinTilt,
-                horizontalPerpendicular.y,
-                horizontalPerpendicular.x * sinTilt + horizontalPerpendicular.z * cosTilt
-        );
-
-        double spacingBetweenLines = SLASH_RANGE / SLASH_LINES;
-
-        for (int lineIndex = 0; lineIndex < SLASH_LINES; lineIndex++) {
-            // Center of this row: start at the eye, then move forward in the look direction.
-            double distanceFromAttacker = lineIndex * spacingBetweenLines;
-            Vec3d lineCenter = eyePosition.add(lookDirection.multiply(distanceFromAttacker));
-
-            // Spread PARTICLES_PER_LINE particles from side to side across the row.
-            for (int i = 0; i < PARTICLES_PER_LINE; i++) {
-                double offsetAlongLine = (Math.random() - 0.5) * LINE_WIDTH;
-
-                double particleX = lineCenter.x + tiltedPerpendicular.x * offsetAlongLine;
-                double particleY = lineCenter.y;
-                double particleZ = lineCenter.z + tiltedPerpendicular.z * offsetAlongLine;
-
-                // spawnParticles(x, y, z, count, velocityX, velocityY, velocityZ, speed).
-                // FIREWORK is a bright spark that fades quickly - a nice "blood magic" slash.
-                world.spawnParticles(ParticleTypes.FIREWORK, particleX, particleY, particleZ, 1, 0.0, 0.0, 0.0, 0.0);
-            }
         }
     }
 }

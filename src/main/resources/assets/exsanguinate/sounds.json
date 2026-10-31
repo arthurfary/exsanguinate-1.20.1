@@ -8,13 +8,49 @@
     "blood_drain": {
         "subtitle": "subtitles.exsanguinate.blood_drain",
         "sounds": [
-            "exsanguinate:blood_drain"
+            {
+                "name": "minecraft:entity.warden.heartbeat",
+                "type": "event"
+            }
         ]
     },
     "blood_fail": {
         "subtitle": "subtitles.exsanguinate.blood_fail",
         "sounds": [
-            "exsanguinate:blood_fail"
+            {
+                "name": "minecraft:block.stone.hit",
+                "type": "event",
+                "pitch": 0.5
+            }
+        ]
+    },
+    "berserk_heartbeat": {
+        "subtitle": "subtitles.exsanguinate.berserk_heartbeat",
+        "sounds": [
+            {
+                "name": "minecraft:entity.warden.heartbeat",
+                "type": "event"
+            }
+        ]
+    },
+    "berserk_ambience": {
+        "subtitle": "subtitles.exsanguinate.berserk_ambience",
+        "sounds": [
+            {
+                "name": "minecraft:ambient.soul_sand_valley.loop",
+                "type": "event",
+                "pitch": 1.5
+            }
+        ]
+    },
+    "infusion_charged": {
+        "subtitle": "subtitles.exsanguinate.infusion_charged",
+        "sounds": [
+            {
+                "name": "minecraft:item.crossbow.loading_end",
+                "type": "event",
+                "pitch": 0.8
+            }
         ]
     }
 }

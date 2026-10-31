@@ -1,13 +1,27 @@
 package net.yut.exsanguinate;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
+import net.yut.exsanguinate.client.BerserkSounds;
+import net.yut.exsanguinate.client.BerserkVignette;
+import net.yut.exsanguinate.client.BloodFootprintParticle;
 import net.yut.exsanguinate.client.ColorFilter;
+import net.yut.exsanguinate.client.ScreenShake;
+import net.yut.exsanguinate.item.CarnelianOathItem;
 import net.yut.exsanguinate.item.ModItems;
+import net.yut.exsanguinate.network.BerserkStatePayload;
 import net.yut.exsanguinate.network.InfusionCompletePayload;
+import net.yut.exsanguinate.particle.ModParticles;
 
 /**
  * CLIENT ENTRYPOINT.
@@ -35,10 +49,40 @@ public class ExsanguinateClient implements ClientModInitializer {
                 (stack, world, entity, seed) -> entity != null && entity.isUsingItem() && entity.getActiveItem() == stack ? 1.0F : 0.0F
         );
 
+        // Camera kick on a fed swing. This is the CLIENT's own attack event, so
+        // the kick lands the instant you click (no waiting for the server).
+        // Dull swings (spam clicks, a blade that can't be fed) get no kick.
+        AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
+            ItemStack stack = player.getMainHandStack();
+            if (world.isClient && entity instanceof LivingEntity && stack.isOf(ModItems.CARNELIAN_OATH)
+                    && player.getAttackCooldownProgress(0.5f) >= CarnelianOathItem.READY
+                    && CarnelianOathItem.bloodBonus(player, stack) > 0.0f) {
+                ScreenShake.kick(CarnelianOathItem.isInfused(stack) ? 0.9f : 0.5f);
+            }
+            return ActionResult.PASS;
+        });
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            ScreenShake.tick();
+            BerserkVignette.tick();
+            BerserkSounds.tick(client);
+        });
+
+        // What the berserk blood footprints look like (the server only says where).
+        ParticleFactoryRegistry.getInstance().register(ModParticles.BLOOD_FOOTPRINT, BloodFootprintParticle.Factory::new);
+
         // When the server tells us the infusion completed, flash the screen
         // black & white for a second (ColorFilter). Handlers run on the
         // network thread, so hop back to the main thread before touching UI.
         ClientPlayNetworking.registerGlobalReceiver(InfusionCompletePayload.TYPE,
                 (payload, player, responseSender) -> MinecraftClient.getInstance().execute(ColorFilter::start));
+
+        // Berserk started/ended: fade the blood vignette in/out. Cleared on
+        // disconnect so it never follows you into another world or server.
+        ClientPlayNetworking.registerGlobalReceiver(BerserkStatePayload.TYPE,
+                (payload, player, responseSender) -> MinecraftClient.getInstance().execute(() -> BerserkVignette.setActive(payload.active())));
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            BerserkVignette.reset();
+            BerserkSounds.reset();
+        });
     }
 }

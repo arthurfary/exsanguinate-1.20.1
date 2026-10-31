@@ -8,3 +8,8 @@ pluginManagement {
 		gradlePluginPortal()
 	}
 }
+
+// Without this the project is named after the folder ("exsanguinate-1.20.1").
+// IntelliJ turns the dots in that name into underscores for its modules, but
+// Loom's run configs keep the dots, so "Minecraft Client" can't find its module.
+rootProject.name = 'exsanguinate'

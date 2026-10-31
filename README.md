@@ -6,16 +6,32 @@ A small Minecraft Fabric mod (1.20.1) built as a learning project.
 
 A heavy blood-ritual blade with a few mechanics:
 
-- **Life drain** - every hit costs the wielder 1 heart. If the wielder is too
-  weak to pay, the syphon "misses": the swing connects but takes no blood and
-  the sword gives a dull refusal thud.
-- **Infusion** - hold right-click for 2 seconds to charge the blade (3 hearts).
-  The next hit deals massive bonus damage, then the charge is consumed.
-  Completing the ritual flashes the screen black & white for a second.
-- **Berserk mode** - at 4 hearts or less, while in combat, the wielder enters
-  a rage state: max health is capped at 4 hearts (with saturation to regen up
-  to it), every hit deals bonus damage, and the infusion only costs 1 heart
-  and half the time. Wears off 10 s after the last combat.
+- **Blood strike** - the blade alone is dull (5 damage). A full-power swing
+  (attack cooldown >= 90%) costs the wielder 1 heart and deals +10 damage.
+  Spam-clicking costs nothing and does nothing special. If the wielder is too
+  weak to pay (1 heart or less) the blade refuses: the swing connects dull,
+  with a refusal thud.
+- **Blood Curse** - every payment (swing or infusion) leaves an open wound
+  for 5 s: no natural (food) healing until it closes, refreshed by each
+  payment. Without it a full food bar heals faster than the sword drains.
+  Berserk keeps its own regen.
+- **Weight** - a fed hit shoves the target back, plays three low layered
+  sounds, sprays blood, kicks the camera (shake + roll) and slows the wielder
+  for half a second of recovery. Infused hits do all of that, bigger.
+- **Infusion** - hold right-click for 2 seconds to charge the blade (3 hearts,
+  paid when the ritual completes; a heartbeat quickens while you hold). The
+  next full swing deals +24 damage instead of the normal bonus, then the
+  charge is consumed. Completing the ritual flashes the screen black & white
+  for a second and plays a short "charged" cue.
+- **Berserk mode** - while holding the sword at 4 hearts or less, in combat,
+  the wielder enters a rage state: max health is capped at 4 hearts (with
+  saturation to regen up to it), every full swing deals +4 damage, and the
+  infusion only costs 1 heart and half the time. Wears off 10 s after the
+  last combat. A berserk wielder leaves bloody footprints (alternating feet,
+  fading after 5 s) that every nearby player can see, and sees a blood
+  vignette on their own screen: it fades in zooming out from the center and
+  fades out zooming back in. They also hear (only them) a low lub-dub
+  heartbeat and an eerie looping drone, fading in and out with the vignette.
 - **Crafting** - the sword is made from 2 Blood Infused Iron + 1 stick.
   Blood Infused Iron is crafted from 1 iron ingot + 1 rotten flesh.
 
@@ -76,5 +92,21 @@ A heavy blood-ritual blade with a few mechanics:
 - Screen shake / filter settings are constants in
   `client/ScreenShake.java` and `client/ColorFilter.java`.
 - The black & white filter needs "Fancy" graphics (vanilla post shaders).
-- Sounds were generated procedurally as placeholders - replace the `.wav`
-  files in `assets/exsanguinate/sounds/` with real audio any time.
+- Minecraft only plays `.ogg`. The procedural `blood_drain.wav` and
+  `blood_fail.wav` were never audible, so `sounds.json` currently points those
+  two events at vanilla sounds (warden heartbeat, stone hit). To use real
+  audio: drop `.ogg` files in `assets/exsanguinate/sounds/` and point the
+  events at them like `sword_swing` does.
+- Also using vanilla stand-ins until custom audio exists:
+  `berserk_heartbeat` (warden heartbeat), `berserk_ambience` (soul sand
+  valley loop, pitched up) and `infusion_charged` (crossbow loaded click).
+  The drone loops, so its custom `.ogg` should loop seamlessly; mark it
+  `"stream": true` in `sounds.json` like vanilla ambience. Heartbeat speed
+  and the volumes are in `client/BerserkSounds`.
+- Damage numbers and feel constants live at the top of `CarnelianOathItem`
+  (blood cost/bonus, knockback, recovery, `IMPACT_VOLUME`) and
+  `client/ScreenShake`. Footprint spacing is in `BerserkMode`, their
+  lifetime and size in `client/BloodFootprintParticle`. Vignette fade times
+  and zoom are in `client/BerserkVignette`; the image is
+  `assets/exsanguinate/textures/misc/blood_vignette.png` (transparent
+  where the world should show through).

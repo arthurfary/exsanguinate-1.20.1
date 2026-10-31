@@ -27,6 +27,15 @@ public class ModSounds {
     // Dull "refusal" thud when the sword cannot take blood (player too weak).
     public static final SoundEvent BLOOD_FAIL = register("blood_fail");
 
+    // Low heartbeat thump, looped by the client while berserk (BerserkSounds).
+    public static final SoundEvent BERSERK_HEARTBEAT = register("berserk_heartbeat");
+
+    // Eerie drone that plays (looping) the whole time the player is berserk.
+    public static final SoundEvent BERSERK_AMBIENCE = register("berserk_ambience");
+
+    // Short cue when the infusion ritual is fully charged.
+    public static final SoundEvent INFUSION_CHARGED = register("infusion_charged");
+
     private static SoundEvent register(String name) {
         Identifier id = new Identifier(Exsanguinate.MOD_ID, name);
         return Registry.register(Registries.SOUND_EVENT, id, SoundEvent.of(id));

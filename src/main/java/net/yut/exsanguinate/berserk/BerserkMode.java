@@ -1,12 +1,21 @@
 package net.yut.exsanguinate.berserk;
 
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.math.Vec3d;
+import net.yut.exsanguinate.item.ModItems;
+import net.yut.exsanguinate.network.BerserkStatePayload;
+import net.yut.exsanguinate.particle.ModParticles;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -18,6 +27,8 @@ import java.util.UUID;
  *  - max health is capped at 4 hearts (with saturation, so they regen up to 4)
  *  - every hit deals bonus damage
  *  - the infusion ritual only costs 1 heart and takes half the time
+ *  - they leave bloody footprints, so other players can tell
+ *  - their own screen gets a blood vignette (client side, BerserkVignette)
  *
  * The state is computed from two things:
  *  1. the player's health (easy, just read it)
@@ -47,7 +58,35 @@ public final class BerserkMode {
     // Player uuid -> entity age of their last combat event (dealt or took damage).
     private static final Map<UUID, Long> LAST_COMBAT = new HashMap<>();
 
+    // ---- Blood footprints (so everyone can see who is berserk) ----
+    // Distance walked between two prints, in blocks.
+    private static final double STRIDE = 0.8;
+
+    // How far each foot lands from the walking line (left/right), in blocks.
+    private static final double FOOT_OFFSET = 0.15;
+
+    // Where a berserk player left their last print, and with which foot.
+    private record Footstep(Vec3d pos, boolean left) {
+    }
+
+    private static final Map<UUID, Footstep> LAST_FOOTSTEP = new HashMap<>();
+
+    // Players whose client was last told "you are berserk" (see tick).
+    private static final Set<UUID> BERSERK_PLAYERS = new HashSet<>();
+
     private BerserkMode() {
+    }
+
+    /**
+     * Called when a player disconnects. Drops everything we remember about
+     * them, so a rejoin starts clean: their client starts with no vignette,
+     * and their combat timestamp (an entity age, which restarts at 0 on
+     * rejoin) can't keep them berserk by mistake.
+     */
+    public static void forget(PlayerEntity player) {
+        LAST_COMBAT.remove(player.getUuid());
+        LAST_FOOTSTEP.remove(player.getUuid());
+        BERSERK_PLAYERS.remove(player.getUuid());
     }
 
     /**
@@ -60,10 +99,12 @@ public final class BerserkMode {
 
     /**
      * Is this player currently berserk?
-     * Low health AND in combat within the last 10 seconds.
+     * Wielding the sword AND low health AND in combat within the last 10 seconds.
+     * (Without the sword check, any player at low health would get their max
+     * health capped, sword or not.)
      */
     public static boolean isActive(PlayerEntity player) {
-        if (player.getHealth() > TRIGGER_HEALTH) {
+        if (!player.getMainHandStack().isOf(ModItems.CARNELIAN_OATH) || player.getHealth() > TRIGGER_HEALTH) {
             return false;
         }
         Long lastCombat = LAST_COMBAT.get(player.getUuid());
@@ -81,7 +122,17 @@ public final class BerserkMode {
             return;
         }
 
-        if (isActive(player)) {
+        boolean active = isActive(player);
+
+        // Tell the player's client when berserk starts or ends, so it can fade
+        // the blood vignette. add/remove return true only when the set actually
+        // changed, i.e. exactly on the tick the state flips.
+        if (player instanceof ServerPlayerEntity serverPlayer
+                && (active ? BERSERK_PLAYERS.add(player.getUuid()) : BERSERK_PLAYERS.remove(player.getUuid()))) {
+            ServerPlayNetworking.send(serverPlayer, new BerserkStatePayload(active));
+        }
+
+        if (active) {
             // Cap max health at 4 hearts so healing (and the saturation below)
             // can never take the player above 4 hearts while berserk.
             if (player.getMaxHealth() != CAP_HEALTH) {
@@ -96,12 +147,52 @@ public final class BerserkMode {
 
             // Saturation regenerates the player back up to the 4-heart cap.
             player.addStatusEffect(new StatusEffectInstance(StatusEffects.SATURATION, 20, 0));
-        } else if (player.getMaxHealth() != DEFAULT_MAX_HEALTH) {
-            // Berserk wore off - give the player their full health bar back.
-            var attribute = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
-            if (attribute != null) {
-                attribute.setBaseValue(DEFAULT_MAX_HEALTH);
+
+            leaveFootprint(player);
+        } else {
+            // Not berserk: forget the trail, so the next rage starts a fresh one.
+            LAST_FOOTSTEP.remove(player.getUuid());
+
+            if (player.getMaxHealth() != DEFAULT_MAX_HEALTH) {
+                // Berserk wore off - give the player their full health bar back.
+                var attribute = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+                if (attribute != null) {
+                    attribute.setBaseValue(DEFAULT_MAX_HEALTH);
+                }
             }
         }
+    }
+
+    /**
+     * Drops a bloody footprint every STRIDE blocks a berserk player walks.
+     * The server spawns them, so every nearby player sees them: they are the
+     * "this one is berserk" warning. Prints alternate left/right feet and
+     * point the way the player walked. Jumping and swimming leave none.
+     */
+    private static void leaveFootprint(PlayerEntity player) {
+        Vec3d pos = player.getPos();
+        Footstep last = LAST_FOOTSTEP.get(player.getUuid());
+        if (last == null) {
+            LAST_FOOTSTEP.put(player.getUuid(), new Footstep(pos, false));
+            return;
+        }
+
+        Vec3d walked = new Vec3d(pos.x - last.pos().x, 0.0, pos.z - last.pos().z);
+        if (walked.lengthSquared() < STRIDE * STRIDE) {
+            return;
+        }
+
+        if (player.isOnGround() && !player.isTouchingWater() && player.getWorld() instanceof ServerWorld world) {
+            Vec3d direction = walked.normalize();
+            // (-z, x) is the walking direction turned 90 degrees: sideways.
+            double side = last.left() ? -FOOT_OFFSET : FOOT_OFFSET;
+            // count 0 = the three "velocity" numbers reach the client as-is.
+            // The footprint reads the first one as its rotation (see
+            // BloodFootprintParticle). 0.02 up stops it flickering into the floor.
+            world.spawnParticles(ModParticles.BLOOD_FOOTPRINT,
+                    pos.x - direction.z * side, pos.y + 0.02, pos.z + direction.x * side,
+                    0, Math.atan2(-direction.x, -direction.z), 0.0, 0.0, 1.0);
+        }
+        LAST_FOOTSTEP.put(player.getUuid(), new Footstep(pos, !last.left()));
     }
 }
