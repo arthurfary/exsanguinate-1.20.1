@@ -54,8 +54,9 @@ public final class BerserkMode {
     // How long berserk lasts after the last combat event (200 ticks = 10 s).
     private static final int AWAY_FROM_COMBAT_TICKS = 200;
 
-    // The vanilla default max health, restored when berserk ends.
-    private static final double DEFAULT_MAX_HEALTH = 20.0;
+    // Player uuid -> the max-health base value they had before we capped it.
+    // Restoring this (not a hardcoded 20) keeps other mods/commands intact.
+    private static final Map<UUID, Double> ORIGINAL_MAX_HEALTH = new HashMap<>();
 
     // Extra damage per hit while berserk.
     public static final float BONUS_DAMAGE = 4.0f;
@@ -97,10 +98,23 @@ public final class BerserkMode {
      * (which starts with no vignette) gets told again if they are berserk.
      */
     public static void forget(PlayerEntity player) {
+        restoreMaxHealth(player);
         LAST_COMBAT.remove(player.getUuid());
         RAGE.remove(player.getUuid());
         LAST_FOOTSTEP.remove(player.getUuid());
         BERSERK_PLAYERS.remove(player.getUuid());
+    }
+
+    /** Puts back the max-health base value recorded when the cap was applied. */
+    private static void restoreMaxHealth(PlayerEntity player) {
+        Double original = ORIGINAL_MAX_HEALTH.remove(player.getUuid());
+        if (original == null) {
+            return;
+        }
+        var attribute = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+        if (attribute != null) {
+            attribute.setBaseValue(original);
+        }
     }
 
     /**
@@ -172,9 +186,11 @@ public final class BerserkMode {
         if (active) {
             // Cap max health at 4 hearts so healing (and the saturation below)
             // can never take the player above 4 hearts while berserk.
-            if (player.getMaxHealth() != CAP_HEALTH) {
-                var attribute = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
-                if (attribute != null) {
+            var attribute = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+            if (attribute != null) {
+                // Remember the real value once, so it can be put back exactly.
+                ORIGINAL_MAX_HEALTH.putIfAbsent(player.getUuid(), attribute.getBaseValue());
+                if (attribute.getBaseValue() != CAP_HEALTH) {
                     attribute.setBaseValue(CAP_HEALTH);
                 }
             }
@@ -189,14 +205,9 @@ public final class BerserkMode {
         } else {
             // Not berserk: forget the trail, so the next rage starts a fresh one.
             LAST_FOOTSTEP.remove(player.getUuid());
-
-            if (player.getMaxHealth() != DEFAULT_MAX_HEALTH) {
-                // Berserk wore off - give the player their full health bar back.
-                var attribute = player.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
-                if (attribute != null) {
-                    attribute.setBaseValue(DEFAULT_MAX_HEALTH);
-                }
-            }
+            // Restores only if this mod capped them - never touches other mods'
+            // max-health changes.
+            restoreMaxHealth(player);
         }
     }
 

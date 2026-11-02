@@ -226,9 +226,10 @@ public class CarnelianOathItem extends SwordItem {
         }
 
         // Start using the item (like drawing a bow or raising a shield).
-        // The heartbeat starts on the first usageTick.
+        // consume() claims the click so the off hand cannot start its own use
+        // and cancel the charge. The heartbeat starts on the first usageTick.
         user.setCurrentHand(hand);
-        return TypedActionResult.pass(stack);
+        return TypedActionResult.consume(stack);
     }
 
     /**
@@ -353,6 +354,12 @@ public class CarnelianOathItem extends SwordItem {
     }
 
     // ======================== INFUSED STATE ========================
+
+    /** The name is bold dark red, wherever the sword is named (tooltip, hotbar, chat). */
+    @Override
+    public Text getName(ItemStack stack) {
+        return super.getName(stack).copy().formatted(Formatting.DARK_RED, Formatting.BOLD);
+    }
 
     /**
      * While infused, the sword glows like an enchanted item (hasGlint controls
@@ -490,23 +497,13 @@ public class CarnelianOathItem extends SwordItem {
     // ======================== TOOLTIP ========================
 
     /**
-     * The description under the item name in the inventory.
-     * While infused, it shows exactly how much damage the next hit will deal.
+     * The description under the item name in the inventory: only lore (see
+     * LoreItem), the same whether or not the blade is charged. (Charged
+     * shows through the glint and the red spores instead.)
      */
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        if (isInfused(stack)) {
-            // Example of the damage the infused blade will yield: the player's
-            // own 1 + the blade + the infused bonus.
-            float damage = 1.0f + getAttackDamage() + INFUSED_BONUS;
-            tooltip.add(Text.translatable("item.exsanguinate.carnelian_oath.tooltip.infused",
-                    String.format("%.1f", damage)).formatted(Formatting.RED));
-        } else {
-            tooltip.add(Text.translatable("item.exsanguinate.carnelian_oath.tooltip.strike",
-                    String.format("%.0f", BLOOD_BONUS)).formatted(Formatting.DARK_RED));
-            tooltip.add(Text.translatable("item.exsanguinate.carnelian_oath.tooltip.wound").formatted(Formatting.GRAY));
-            tooltip.add(Text.translatable("item.exsanguinate.carnelian_oath.tooltip.hint").formatted(Formatting.GRAY));
-        }
+        LoreItem.appendLore(tooltip, getTranslationKey());
     }
 
     // ======================== HELPERS ========================

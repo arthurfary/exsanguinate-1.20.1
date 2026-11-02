@@ -3,9 +3,13 @@ package net.yut.exsanguinate;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.yut.exsanguinate.berserk.BerserkMode;
+import net.yut.exsanguinate.block.ModBlocks;
+import net.yut.exsanguinate.block.entity.ModBlockEntities;
 import net.yut.exsanguinate.effect.ModEffects;
+import net.yut.exsanguinate.item.ModItemGroups;
 import net.yut.exsanguinate.item.ModItems;
 import net.yut.exsanguinate.particle.ModParticles;
+import net.yut.exsanguinate.ritual.Rituals;
 import net.yut.exsanguinate.sound.ModSounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,9 +37,14 @@ public class Exsanguinate implements ModInitializer {
     public void onInitialize() {
         // Each register* method registers its own content (see the classes).
         ModItems.registerModItems();
+        ModBlocks.registerModBlocks();
+        ModBlockEntities.registerModBlockEntities();
+        ModItemGroups.registerItemGroups();
         ModEffects.registerModEffects();
         ModSounds.registerModSounds();
         ModParticles.registerModParticles();
+        // Kills near a Blood Altar start its ritual.
+        Rituals.register();
 
         // Berserk state is per player and in memory: drop it when they leave.
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> BerserkMode.forget(handler.player));

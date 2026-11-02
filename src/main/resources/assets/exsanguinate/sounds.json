@@ -1,12 +1,10 @@
 {
     "sword_swing": {
-        "subtitle": "subtitles.exsanguinate.sword_swing",
         "sounds": [
             "exsanguinate:sword_swing"
         ]
     },
     "blood_drain": {
-        "subtitle": "subtitles.exsanguinate.blood_drain",
         "sounds": [
             {
                 "name": "minecraft:entity.warden.heartbeat",
@@ -15,7 +13,6 @@
         ]
     },
     "blood_fail": {
-        "subtitle": "subtitles.exsanguinate.blood_fail",
         "sounds": [
             {
                 "name": "minecraft:block.stone.hit",
@@ -25,7 +22,6 @@
         ]
     },
     "berserk_heartbeat": {
-        "subtitle": "subtitles.exsanguinate.berserk_heartbeat",
         "sounds": [
             {
                 "name": "minecraft:entity.warden.heartbeat",
@@ -34,7 +30,6 @@
         ]
     },
     "berserk_ambience": {
-        "subtitle": "subtitles.exsanguinate.berserk_ambience",
         "sounds": [
             {
                 "name": "minecraft:ambient.soul_sand_valley.loop",
@@ -44,12 +39,38 @@
         ]
     },
     "infusion_charged": {
-        "subtitle": "subtitles.exsanguinate.infusion_charged",
         "sounds": [
             {
                 "name": "minecraft:item.crossbow.loading_end",
                 "type": "event",
                 "pitch": 0.8
+            }
+        ]
+    },
+    "altar_hum": {
+        "sounds": [
+            {
+                "name": "minecraft:ambient.soul_sand_valley.loop",
+                "type": "event",
+                "pitch": 0.5
+            }
+        ]
+    },
+    "altar_hum_flesh": {
+        "sounds": [
+            {
+                "name": "minecraft:ambient.crimson_forest.loop",
+                "type": "event",
+                "pitch": 0.5
+            }
+        ]
+    },
+    "altar_whisper": {
+        "sounds": [
+            {
+                "name": "minecraft:ambient.soul_sand_valley.additions",
+                "type": "event",
+                "pitch": 0.55
             }
         ]
     }

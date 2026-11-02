@@ -1,0 +1,29 @@
+# Gradle
+.gradle/
+build/
+out/
+classes/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# VS Code / Eclipse
+.settings/
+.vscode/
+.classpath
+.project
+
+# macOS
+.DS_Store
+
+# Fabric run directory (worlds, logs, options)
+run/
+
+# JVM crash logs
+hs_err_*.log
+replay_*.log
+*.hprof
+*.jfr

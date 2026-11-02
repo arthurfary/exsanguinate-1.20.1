@@ -34,8 +34,48 @@ A heavy blood-ritual blade with a few mechanics:
   vignette on their own screen: it fades in zooming out from the center and
   fades out zooming back in. They also hear (only them) a low lub-dub
   heartbeat and an eerie looping drone, fading in and out with the vignette.
-- **Crafting** - the sword is made from 2 Blood Infused Iron + 1 stick.
-  Blood Infused Iron is crafted from 1 iron ingot + 1 rotten flesh.
+- **Forging** - the sword is not crafted, it is forged in a blood ritual
+  (see below).
+
+## The Blood Ritual
+
+Everything is in its own creative tab, "Exsanguinate". Names are coloured
+(Carnelian Oath dark red, Heavy Cleaver and Altar of the Lesser Zenith gold) by overriding
+`getName()`. In game every item only shows its lore, if it has any (see
+`LoreItem`; the lines live in `lang/en_us.json` as `<key>.lore.1`, `.lore.2`...;
+the Heavy Cleaver has none, so it shows just its name). The real
+rules, for me:
+
+1. **Heavy Cleaver** (`cleaver`, crafted: `II` / `II` / ` S`, I = iron
+   ingot, S = stick). Kill something with it while holding **iron ingots in
+   the off hand**: each kill has a 50% chance to turn one ingot into
+   **Bloodquenched Iron** (`blood_infused_iron`). Blood flies from the
+   victim into the ingot with a hiss; a miss only gives off a wisp of smoke.
+2. **Altar of the Lesser Zenith** (`blood_altar`, crafted: `RFR` / `DDD` / ` D `,
+   R = redstone, F = rotten flesh, D = polished deepslate). Right-click it
+   with an item to lay one on it (up to 4), right-click with an empty hand
+   to take the last one back. The items float above the basin at their
+   true size (the Carnelian Oath is huge there too).
+3. Lay **2 Bloodquenched Iron + 1 stick** on it. The altar is now primed:
+   it seeps red spores, drones very quietly (heard only within the same 6
+blocks a kill reaches) (a lower, sicker cousin of the
+   berserk drone, see `client/AltarHumSound`) and whispers now and then.
+4. **Kill a creature within 6 blocks of it.** Its blood leaps from the
+   corpse to the altar and the 4 second ritual begins: the offering rises,
+   spins faster and closes in while a spiral of blood tightens around it
+   and a heartbeat quickens; in the last second the items tremble and melt
+   together. The end is dark, not flashy: black ink and a thick cloud of
+smoke spill out with one deep thud, a ring of
+   blood stains the floor, and players within 12 blocks get one dull camera
+   thud and 3 seconds of Darkness. Nothing is heard past ~16 blocks. The
+   Carnelian Oath is left floating above the altar; take it with an empty
+   hand.
+
+Rituals live in `ritual/Rituals.java` (one line each: offering + result).
+Timings, sounds and particles are in `block/entity/BloodAltarBlockEntity`
+(`WITNESS_RADIUS`, `DARKNESS_TICKS` = 0 to drop the darkness,
+`WHISPER_CHANCE`), the floating items in `client/BloodAltarRenderer`, the
+drone volumes in `client/AltarHumSound`.
 
 ## Building / Running
 
@@ -69,25 +109,35 @@ A heavy blood-ritual blade with a few mechanics:
       Tooltip shows "Infused! Next hit deals 16.0 damage" while charged and a
       hint line otherwise.
       TODO: show berserk state in the tooltip too, color-code the example.
-- [x] **5. Crafting** (barebones)
-      Blood Infused Iron (iron ingot + rotten flesh) -> the sword
-      (B/B/S pattern). Uses the vanilla iron-ingot sprite as a placeholder.
-      TODO: custom texture/3D model for Blood Infused Iron, cooler recipe
-      (e.g. a "blood vial" item dropped by mobs, anvil ritual, redstone +
-      ghast tear + iron), advancement for crafting the sword.
+- [x] **5. Crafting** -> replaced by the blood ritual (see above)
+      Cleaver kills with iron in the off hand make Blood Infused Iron (50%);
+      the sword is forged on the Blood Altar by a sacrifice. Custom 16x16
+      textures for the cleaver, the iron and the altar.
+      TODO: real 3D model for the cleaver, data-driven (JSON) rituals,
+      custom sounds for the altar (vanilla stand-ins for now: soul sand
+      valley + crimson forest loops at half pitch, soul sand valley
+      additions, beacon hum, warden heartbeat, sculk catalyst, respawn
+      anchor).
 
 ## Structure
 
 - `src/main/java/net/yut/exsanguinate/` - the mod's Java code
-  - `item/` - items (CarnelianOathItem, ModItems)
+  - `item/` - items (CarnelianOathItem, CleaverItem, LoreItem, ModItems),
+    ColoredBlockItem (the altar's gold name) and ModItemGroups (the mod's
+    own creative tab - add new items there)
+  - `block/` - the Blood Altar block (ModBlocks), and in `block/entity/`
+    its block entity (items + ritual timer) and ModBlockEntities
+  - `ritual/` - the rituals the altar knows and the kill that starts them
   - `sound/` - sound events (ModSounds)
   - `effect/` - status effects (BloodCurse)
   - `berserk/` - berserk mode logic (BerserkMode)
-  - `client/` - client-only: ScreenShake, ColorFilter
+  - `client/` - client-only: ScreenShake, ColorFilter, BloodAltarRenderer,
+    AltarHumSound
   - `mixin/` - mixins that patch Minecraft classes
-  - `network/` - packets (InfusionCompletePayload)
-- `src/main/resources/` - assets (models, sounds, lang) and data (recipes)
-- `src/main/generated/` - datagen output (run via `./gradlew runDatagen`)
+  - `network/` - packets (InfusionCompletePayload, RitualCompletePayload)
+- `src/main/resources/` - assets (models, textures, sounds, lang) and data
+  (recipes, loot table, tags). Note: 1.20.1 reads `data/<mod>/recipes/` and
+  `loot_tables/` (plural); the singular names are 1.21+.
 
 ## Notes
 

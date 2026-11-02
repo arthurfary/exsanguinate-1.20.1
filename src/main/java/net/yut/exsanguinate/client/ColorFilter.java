@@ -5,6 +5,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 import net.yut.exsanguinate.mixin.GameRendererAccessor;
 
 /**
@@ -23,35 +24,44 @@ public class ColorFilter {
     // The vanilla desaturation shader (packaged with the game).
     private static final Identifier DESATURATE = new Identifier("shaders/post/desaturate.json");
 
-    // Seconds of black & white left. 0 = no filter active.
-    private static float secondsLeft = 0.0f;
+    // Wall-clock time (ms) the flash ends. 0 = no filter active.
+    private static long endTimeMs = 0L;
+
+    // True only when this class loaded the shader, so we never disable one
+    // that was already running (another mod, the spectator shader, ...).
+    private static boolean loadedByUs = false;
 
     private ColorFilter() {
     }
 
     /** Called (via packet) when the infusion completes. Starts the 1 s flash. */
     public static void start() {
-        secondsLeft = 1.0f;
+        endTimeMs = Util.getMeasuringTimeMs() + 1000L;
     }
 
     /**
      * Called every rendered frame (from GameRendererMixin).
      * Keeps the filter loaded for the remaining time, then disables it.
      */
-    public static void tick(float tickDelta) {
+    public static void tick() {
         GameRenderer gameRenderer = MinecraftClient.getInstance().gameRenderer;
-        if (secondsLeft <= 0.0f) {
+
+        if (endTimeMs == 0L) {
+            return;
+        }
+
+        if (Util.getMeasuringTimeMs() >= endTimeMs) {
+            endTimeMs = 0L;
+            if (loadedByUs) {
+                loadedByUs = false;
+                gameRenderer.disablePostProcessor();
+            }
             return;
         }
 
         if (gameRenderer.getPostProcessor() == null) {
             ((GameRendererAccessor) gameRenderer).callLoadPostProcessor(DESATURATE);
-        }
-
-        secondsLeft -= tickDelta;
-        if (secondsLeft <= 0.0f) {
-            secondsLeft = 0.0f;
-            gameRenderer.disablePostProcessor();
+            loadedByUs = true;
         }
     }
 }

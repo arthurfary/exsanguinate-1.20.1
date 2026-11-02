@@ -36,6 +36,12 @@ public class ModSounds {
     // Short cue when the infusion ritual is fully charged.
     public static final SoundEvent INFUSION_CHARGED = register("infusion_charged");
 
+    // The low, sick drone of a primed Blood Altar (two layers, looped by
+    // client/AltarHumSound) and the rare whisper it lets out.
+    public static final SoundEvent ALTAR_HUM = register("altar_hum");
+    public static final SoundEvent ALTAR_HUM_FLESH = register("altar_hum_flesh");
+    public static final SoundEvent ALTAR_WHISPER = register("altar_whisper");
+
     private static SoundEvent register(String name) {
         Identifier id = new Identifier(Exsanguinate.MOD_ID, name);
         return Registry.register(Registries.SOUND_EVENT, id, SoundEvent.of(id));

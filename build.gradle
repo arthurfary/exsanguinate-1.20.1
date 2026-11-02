@@ -21,9 +21,19 @@ repositories {
 	// for more information about repositories.
 }
 
-fabricApi {
-	configureDataGeneration {
-		client = true
+loom {
+	runs {
+		configureEach {
+			// The game runs on a new Java (25) while Minecraft 1.20.1 ships old
+			// libraries (JNA, Guava) that use features new Java warns about.
+			// These flags just say "allowed": the warnings go away, nothing
+			// else changes. Harmless to remove if you go back to Java 17/21.
+			vmArg "--enable-native-access=ALL-UNNAMED"
+			if (JavaVersion.current() >= JavaVersion.VERSION_23) {
+				// Only Java 23+ knows this flag; older Java would refuse to start.
+				vmArg "--sun-misc-unsafe-memory-access=allow"
+			}
+		}
 	}
 }
 

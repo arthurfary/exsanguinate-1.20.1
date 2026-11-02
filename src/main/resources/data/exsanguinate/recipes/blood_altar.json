@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "RFR",
+    "DDD",
+    " D "
+  ],
+  "key": {
+    "R": { "item": "minecraft:redstone" },
+    "F": { "item": "minecraft:rotten_flesh" },
+    "D": { "item": "minecraft:polished_deepslate" }
+  },
+  "result": {
+    "item": "exsanguinate:blood_altar"
+  }
+}

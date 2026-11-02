@@ -31,6 +31,6 @@ public class GameRendererMixin {
     )
     private void exsanguinate$applyScreenShake(float tickDelta, long limitTime, MatrixStack matrices, CallbackInfo ci) {
         ScreenShake.apply(matrices, tickDelta);
-        ColorFilter.tick(tickDelta);
+        ColorFilter.tick();
     }
 }

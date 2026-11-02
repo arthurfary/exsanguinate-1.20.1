@@ -8,12 +8,19 @@ import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
+import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
+import net.yut.exsanguinate.block.entity.BloodAltarBlockEntity;
+import net.yut.exsanguinate.block.entity.ModBlockEntities;
+import net.yut.exsanguinate.client.AltarHumSound;
 import net.yut.exsanguinate.client.BerserkSounds;
 import net.yut.exsanguinate.client.BerserkVignette;
+import net.yut.exsanguinate.client.BloodAltarRenderer;
 import net.yut.exsanguinate.client.BloodFootprintParticle;
 import net.yut.exsanguinate.client.ColorFilter;
 import net.yut.exsanguinate.client.ScreenShake;
@@ -21,6 +28,7 @@ import net.yut.exsanguinate.item.CarnelianOathItem;
 import net.yut.exsanguinate.item.ModItems;
 import net.yut.exsanguinate.network.BerserkStatePayload;
 import net.yut.exsanguinate.network.InfusionCompletePayload;
+import net.yut.exsanguinate.network.RitualCompletePayload;
 import net.yut.exsanguinate.particle.ModParticles;
 
 /**
@@ -67,6 +75,21 @@ public class ExsanguinateClient implements ClientModInitializer {
             BerserkSounds.tick(client);
         });
 
+        // The Blood Altar's floating offering (see BloodAltarRenderer) and the
+        // drone of a primed altar (see AltarHumSound).
+        BlockEntityRendererFactories.register(ModBlockEntities.BLOOD_ALTAR, BloodAltarRenderer::new);
+        BloodAltarBlockEntity.clientHum = AltarHumSound::keepAlive;
+        BloodAltarBlockEntity.clientWhisper = AltarHumSound::whisper;
+
+        // A ritual completed close by: one dull thud of the camera, softer
+        // with distance (only players within WITNESS_RADIUS get this).
+        ClientPlayNetworking.registerGlobalReceiver(RitualCompletePayload.TYPE,
+                (payload, player, responseSender) -> MinecraftClient.getInstance().execute(() -> {
+                    double distance = Math.sqrt(player.squaredDistanceTo(Vec3d.ofCenter(payload.pos())));
+                    float closeness = 1.0f - (float) (distance / BloodAltarBlockEntity.WITNESS_RADIUS);
+                    ScreenShake.kick(0.4f * MathHelper.clamp(closeness, 0.0f, 1.0f));
+                }));
+
         // What the berserk blood footprints look like (the server only says where).
         ParticleFactoryRegistry.getInstance().register(ModParticles.BLOOD_FOOTPRINT, BloodFootprintParticle.Factory::new);
 
@@ -83,6 +106,7 @@ public class ExsanguinateClient implements ClientModInitializer {
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             BerserkVignette.reset();
             BerserkSounds.reset();
+            AltarHumSound.reset();
         });
     }
 }
