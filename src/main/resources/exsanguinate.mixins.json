@@ -3,6 +3,7 @@
 	"package": "net.yut.exsanguinate.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
+		"DamageSourceMixin",
 		"LivingEntityAccessor",
 		"LivingEntityMixin",
 		"PlayerEntityMixin"

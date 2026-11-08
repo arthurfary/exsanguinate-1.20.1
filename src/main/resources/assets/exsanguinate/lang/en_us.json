@@ -1,13 +1,17 @@
+// %1$s player who died
+// %2$s player who killed
 {
   "itemGroup.exsanguinate": "Exsanguinate",
 
   "item.exsanguinate.carnelian_oath": "Carnelian Oath",
   "item.exsanguinate.carnelian_oath.lore.1": "Swear it, and the blade will see it kept.",
+  "death.attack.exsanguinate.carnelian_oath": "%1$s's ichor was repurposed",
 
   "item.exsanguinate.blood_infused_iron": "Bloodquenched Iron",
   "item.exsanguinate.blood_infused_iron.lore.1": "Still warm.",
 
   "item.exsanguinate.cleaver": "Heavy Cleaver",
+  "death.attack.exsanguinate.cleaver": "%1$s was butchered by %2$s",
 
   "block.exsanguinate.blood_altar": "Altar of the Lesser Zenith",
   "block.exsanguinate.blood_altar.lore.1": "An altar raised as a summit,",

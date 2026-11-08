@@ -3,11 +3,13 @@
 
   "item.exsanguinate.carnelian_oath": "O Juramento Cornalina",
   "item.exsanguinate.carnelian_oath.lore.1": "Jure, e a lâmina zelará por sua palavra.",
+  "death.attack.exsanguinate.carnelian_oath": "O icor de %1$s's foi reapropriado",
 
   "item.exsanguinate.blood_infused_iron": "Ferro Ensanguentado",
   "item.exsanguinate.blood_infused_iron.lore.1": "Ainda quente.",
 
   "item.exsanguinate.cleaver": "Cutelo Pesado",
+  "death.attack.exsanguinate.cleaver": "%1$s virou picadinho de %2$s",
 
   "block.exsanguinate.blood_altar": "Altar do Zênite Menor",
   "block.exsanguinate.blood_altar.lore.1": "Um altar erguido como um cume,",

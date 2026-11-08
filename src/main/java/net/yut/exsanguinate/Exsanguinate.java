@@ -6,6 +6,7 @@ import net.yut.exsanguinate.berserk.BerserkMode;
 import net.yut.exsanguinate.block.ModBlocks;
 import net.yut.exsanguinate.block.entity.ModBlockEntities;
 import net.yut.exsanguinate.effect.ModEffects;
+import net.yut.exsanguinate.item.BladeKills;
 import net.yut.exsanguinate.item.ModItemGroups;
 import net.yut.exsanguinate.item.ModItems;
 import net.yut.exsanguinate.particle.ModParticles;
@@ -45,6 +46,8 @@ public class Exsanguinate implements ModInitializer {
         ModParticles.registerModParticles();
         // Kills near a Blood Altar start its ritual.
         Rituals.register();
+        // Player kills with the blades: head drops (death messages: DamageSourceMixin).
+        BladeKills.register();
 
         // Berserk state is per player and in memory: drop it when they leave.
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> BerserkMode.forget(handler.player));
