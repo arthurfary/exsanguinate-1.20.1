@@ -17,5 +17,10 @@
   "block.exsanguinate.blood_altar.lore.1": "An altar raised as a summit,",
   "block.exsanguinate.blood_altar.lore.2": "for those who would rather borrow greatness than be refused it.",
 
-  "effect.exsanguinate.blood_curse": "Blood Curse"
+  "effect.exsanguinate.blood_curse": "Blood Curse",
+
+  "category.exsanguinate.dev": "Exsanguinate (dev)",
+  "key.exsanguinate.dev_berserk": "Berserk preview",
+  "exsanguinate.dev.berserk.on": "Berserk visuals: ON (dev preview)",
+  "exsanguinate.dev.berserk.off": "Berserk visuals: OFF (dev preview)"
 }

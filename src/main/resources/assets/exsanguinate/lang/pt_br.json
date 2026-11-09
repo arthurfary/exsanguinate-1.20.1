@@ -15,5 +15,10 @@
   "block.exsanguinate.blood_altar.lore.1": "Um altar erguido como um cume,",
   "block.exsanguinate.blood_altar.lore.2": "para aqueles que preferem emprestar grandeza do que tê-la negada.",
 
-  "effect.exsanguinate.blood_curse": "Maldição de Sangue"
+  "effect.exsanguinate.blood_curse": "Maldição de Sangue",
+
+  "category.exsanguinate.dev": "Exsanguinate (dev)",
+  "key.exsanguinate.dev_berserk": "Testar fúria",
+  "exsanguinate.dev.berserk.on": "Visuais de fúria: LIGADOS (preview dev)",
+  "exsanguinate.dev.berserk.off": "Visuais de fúria: DESLIGADOS (preview dev)"
 }

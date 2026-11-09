@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  *
  * This is the classic "screen shake" spot: translating the view matrix
  * shifts everything the camera sees, while the HUD stays in place.
- * The black & white filter is also ticked from here, once per frame.
+ * The berserk colour filter is also ticked from here, once per frame.
  */
 @Mixin(GameRenderer.class)
 public class GameRendererMixin {
@@ -31,6 +31,7 @@ public class GameRendererMixin {
     )
     private void exsanguinate$applyScreenShake(float tickDelta, long limitTime, MatrixStack matrices, CallbackInfo ci) {
         ScreenShake.apply(matrices, tickDelta);
+        // Once per frame, so the berserk filter can fade smoothly.
         ColorFilter.tick();
     }
 }

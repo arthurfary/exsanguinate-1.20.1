@@ -11,7 +11,8 @@
 	"client": [
 		"GameRendererAccessor",
 		"GameRendererMixin",
-		"InGameHudMixin"
+		"InGameHudMixin",
+		"PostEffectProcessorAccessor"
 	],
 	"injectors": {
 		"defaultRequire": 1

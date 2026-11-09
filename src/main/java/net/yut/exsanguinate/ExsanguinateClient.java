@@ -18,6 +18,7 @@ import net.minecraft.util.math.Vec3d;
 import net.yut.exsanguinate.block.entity.BloodAltarBlockEntity;
 import net.yut.exsanguinate.block.entity.ModBlockEntities;
 import net.yut.exsanguinate.client.AltarHumSound;
+import net.yut.exsanguinate.client.BerserkPreview;
 import net.yut.exsanguinate.client.BerserkSounds;
 import net.yut.exsanguinate.client.BerserkVignette;
 import net.yut.exsanguinate.client.BloodAltarRenderer;
@@ -27,7 +28,6 @@ import net.yut.exsanguinate.client.ScreenShake;
 import net.yut.exsanguinate.item.CarnelianOathItem;
 import net.yut.exsanguinate.item.ModItems;
 import net.yut.exsanguinate.network.BerserkStatePayload;
-import net.yut.exsanguinate.network.InfusionCompletePayload;
 import net.yut.exsanguinate.network.RitualCompletePayload;
 import net.yut.exsanguinate.particle.ModParticles;
 
@@ -44,6 +44,10 @@ import net.yut.exsanguinate.particle.ModParticles;
 public class ExsanguinateClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
+        // Dev only: F9 toggles the berserk visuals, so they can be tested
+        // without building rage first. Does nothing in a normal install.
+        BerserkPreview.register();
+
         // Model predicates are the "switches" used by item model overrides.
         // The vanilla shield uses the "blocking" predicate (1 when the holder
         // is using the item) to swap to its blocking model. We register the
@@ -73,6 +77,9 @@ public class ExsanguinateClient implements ClientModInitializer {
             ScreenShake.tick();
             BerserkVignette.tick();
             BerserkSounds.tick(client);
+            // Loads/removes the berserk colour shader between frames (never
+            // in the middle of the world render, which would smear the screen).
+            ColorFilter.updateShader();
         });
 
         // The Blood Altar's floating offering (see BloodAltarRenderer) and the
@@ -93,18 +100,14 @@ public class ExsanguinateClient implements ClientModInitializer {
         // What the berserk blood footprints look like (the server only says where).
         ParticleFactoryRegistry.getInstance().register(ModParticles.BLOOD_FOOTPRINT, BloodFootprintParticle.Factory::new);
 
-        // When the server tells us the infusion completed, flash the screen
-        // black & white for a second (ColorFilter). Handlers run on the
-        // network thread, so hop back to the main thread before touching UI.
-        ClientPlayNetworking.registerGlobalReceiver(InfusionCompletePayload.TYPE,
-                (payload, player, responseSender) -> MinecraftClient.getInstance().execute(ColorFilter::start));
-
-        // Berserk started/ended: fade the blood vignette in/out. Cleared on
-        // disconnect so it never follows you into another world or server.
+        // Berserk started/ended: fade the blood vignette in/out, and fade the
+        // colour out of the screen (ColorFilter) until it ends. Cleared on
+        // disconnect so neither follows you into another world or server.
         ClientPlayNetworking.registerGlobalReceiver(BerserkStatePayload.TYPE,
                 (payload, player, responseSender) -> MinecraftClient.getInstance().execute(() -> BerserkVignette.setActive(payload.active())));
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             BerserkVignette.reset();
+            ColorFilter.reset();
             BerserkSounds.reset();
             AltarHumSound.reset();
         });

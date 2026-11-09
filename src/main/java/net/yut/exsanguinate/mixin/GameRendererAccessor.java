@@ -7,7 +7,8 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 /**
  * Gives us access to GameRenderer.loadPostProcessor(), which is package
- * private in vanilla. ColorFilter uses it to load the black & white shader.
+ * private in vanilla. ColorFilter uses it to load the berserk desaturation
+ * shader (and only that shader).
  */
 @Mixin(GameRenderer.class)
 public interface GameRendererAccessor {

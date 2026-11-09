@@ -34,6 +34,18 @@ loom {
 				vmArg "--sun-misc-unsafe-memory-access=allow"
 			}
 		}
+
+		// DEV CLIENT - jump straight into a test world instead of waiting on
+		// the main menu every launch. The world is a normal save in
+		// run/saves; create it once (Creative + Superflat loads fastest).
+		// Use another save with:  ./gradlew runClient -PquickPlayWorld=MyWorld
+		// If the save does not exist yet, the client opens the menu as usual.
+		client {
+			String quickPlayWorld = (project.findProperty("quickPlayWorld") ?: "exsanguinate-dev") as String
+			if (file("run/saves/${quickPlayWorld}").isDirectory()) {
+				programArgs "--quickPlaySingleplayer", quickPlayWorld
+			}
+		}
 	}
 }
 

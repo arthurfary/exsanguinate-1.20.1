@@ -1,7 +1,6 @@
 package net.yut.exsanguinate.item;
 
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
@@ -34,7 +33,6 @@ import net.minecraft.world.World;
 import net.yut.exsanguinate.berserk.BerserkMode;
 import net.yut.exsanguinate.effect.ModEffects;
 import net.yut.exsanguinate.mixin.LivingEntityAccessor;
-import net.yut.exsanguinate.network.InfusionCompletePayload;
 import net.yut.exsanguinate.sound.ModSounds;
 
 import java.util.List;
@@ -328,12 +326,6 @@ public class CarnelianOathItem extends SwordItem {
                 serverWorld.playSound(null, player.getBlockPos(), ModSounds.INFUSION_CHARGED,
                         SoundCategory.PLAYERS, 0.8f, 1.0f);
                 spawnParticleBurst(serverWorld, player.getPos().add(0, 1.5, 0), 30);
-
-                // Tell the client "infusion done" so it can flash the screen
-                // black & white for a second (ColorFilter).
-                if (player instanceof ServerPlayerEntity serverPlayer) {
-                    ServerPlayNetworking.send(serverPlayer, new InfusionCompletePayload());
-                }
             } else {
                 // Not enough blood - the ritual fails with a dull thud.
                 spawnParticleBurst(serverWorld, player.getPos().add(0, 1.5, 0), 6);

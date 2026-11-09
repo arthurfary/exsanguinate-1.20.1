@@ -21,8 +21,7 @@ A heavy blood-ritual blade with a few mechanics:
 - **Infusion** - hold right-click for 2 seconds to charge the blade (3 hearts,
   paid when the ritual completes; a heartbeat quickens while you hold). The
   next full swing deals +24 damage instead of the normal bonus, then the
-  charge is consumed. Completing the ritual flashes the screen black & white
-  for a second and plays a short "charged" cue.
+  charge is consumed. Completing the ritual plays a short "charged" cue.
 - **Berserk mode** - every fed hit builds rage (the hit's damage before
   armor). At 55 rage in one fight - two charged hits, one charged + two
   normal, or four normal - the wielder enters a rage state: max health is
@@ -34,6 +33,10 @@ A heavy blood-ritual blade with a few mechanics:
   vignette on their own screen: it fades in zooming out from the center and
   fades out zooming back in. They also hear (only them) a low lub-dub
   heartbeat and an eerie looping drone, fading in and out with the vignette.
+  Finally, the whole screen drains of colour while berserk: full black &
+  white, except reds (blood, the blade's glow, the vignette), which keep
+  their colour. It fades in over 1 s and out over 2 s, via the custom post
+  shader in `client/ColorFilter`.
 - **Forging** - the sword is not crafted, it is forged in a blood ritual
   (see below).
 
@@ -92,12 +95,10 @@ drone volumes in `client/AltarHumSound`.
       is refused up front if the player can't pay, and fails with the same
       sound if health drops mid-charge.
       TODO: decide if the whole hit should whiff instead of just the syphon.
-- [x] **2. Custom drain sound + black & white flash on infusion** (barebones)
+- [x] **2. Custom drain sound on infusion**
       `blood_drain` (procedural heartbeat thump) plays when the ritual starts
-      and completes; `blood_fail` for refusals. On completion the client
-      applies the vanilla `desaturate` post shader for 1 second.
-      TODO: fade back to color smoothly (custom shader instead of the
-      vanilla desaturate), looping drain sound while charging.
+      and completes; `blood_fail` for refusals.
+      TODO: looping drain sound while charging.
 - [x] **3. Berserk / rage mode at low health** (barebones)
       At <= 4 hearts and recently in combat: max health capped at 4 hearts,
       saturation to regen to 4, +4 damage per hit, infusion costs 1 heart and
@@ -131,19 +132,59 @@ drone volumes in `client/AltarHumSound`.
   - `sound/` - sound events (ModSounds)
   - `effect/` - status effects (BloodCurse)
   - `berserk/` - berserk mode logic (BerserkMode)
-  - `client/` - client-only: ScreenShake, ColorFilter, BloodAltarRenderer,
-    AltarHumSound
+  - `client/` - client-only: ScreenShake, ColorFilter, BerserkVignette,
+    BerserkSounds, BloodAltarRenderer, AltarHumSound and BerserkPreview
+    (a dev-only F9 key that fakes berserk, so its visuals can be tested
+    without grinding rage)
   - `mixin/` - mixins that patch Minecraft classes
-  - `network/` - packets (InfusionCompletePayload, RitualCompletePayload)
+  - `network/` - packets (BerserkStatePayload, RitualCompletePayload)
 - `src/main/resources/` - assets (models, textures, sounds, lang) and data
   (recipes, loot table, tags). Note: 1.20.1 reads `data/<mod>/recipes/` and
   `loot_tables/` (plural); the singular names are 1.21+.
+
+## Testing (dev loop)
+
+Do not build a jar and drop it in a real launcher for everyday changes: that
+means a full 80-mod client boot plus a big save every time. Use the dev
+client instead:
+
+```
+dev.bat                (or: ./gradlew runClient)
+```
+
+- **Skip the main menu.** Create the test world once: Creative, Superflat,
+  name it `exsanguinate-dev` (Superflat loads fastest). From then on the dev
+  client jumps straight into it (`--quickPlaySingleplayer`, set up in
+  `build.gradle`). Use another save with `-PquickPlayWorld=MyWorld`.
+- **Keep the client running.** A restart is only needed for code changes
+  (and even then, see below).
+  - `F3+T` reloads textures, models, lang, `sounds.json` and shaders. Run
+    `./gradlew processResources` first if you edited files under
+    `src/main/resources` (they are copied to `build/resources/main`, which
+    is what the game reads). Shader edits also need the filter to reload:
+    press F9 twice.
+  - `/reload` reloads data packs: recipes, loot tables, tags.
+  - F9 (dev only) toggles the berserk visuals, so the colour drain, vignette
+    and sounds can be checked without building 55 rage.
+- **Code changes.** `runClient` only recompiles changed files, so a fresh
+  launch is the simple way. For method-body changes, run the client from
+  IntelliJ in Debug (the bundled JetBrains Runtime supports enhanced class
+  redefinition) and use *Reload Changed Classes*; changes in `mixin/` still
+  need a restart. New fields/methods need a restart too unless the enhanced
+  redefinition is enabled in *Settings > Build, Execution, Deployment >
+  Debugger > HotSwap*.
+- `./gradlew build` is only for sharing the mod or putting it in a real
+  modpack; the jar lands in `build/libs/`.
 
 ## Notes
 
 - Screen shake / filter settings are constants in
   `client/ScreenShake.java` and `client/ColorFilter.java`.
-- The black & white filter needs "Fancy" graphics (vanilla post shaders).
+- The berserk colour filter (`client/ColorFilter`) is a custom post shader
+  in `assets/exsanguinate/shaders/` and needs "Fancy" graphics. Its fade
+  times are constants in `ColorFilter`; the desaturation strength is the
+  `Desaturation` value in `berserk_desaturate.json` (1.0 = full black &
+  white).
 - Minecraft only plays `.ogg`. The procedural `blood_drain.wav` and
   `blood_fail.wav` were never audible, so `sounds.json` currently points those
   two events at vanilla sounds (warden heartbeat, stone hit). To use real
